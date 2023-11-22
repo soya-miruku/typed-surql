@@ -1,7 +1,7 @@
-import "reflect-metadata";
-import "core-js";
+import "npm:reflect-metadata@latest";
+import "npm:core-js@latest";
 import { ExperimentalSurrealHTTP, Surreal } from "surrealdb.js";
-import { AsyncReturnType } from "type-fest";
+import { AsyncReturnType } from "npm:type-fest@latest";
 import { ConnectionOptions } from "./surreal-types.ts";
 
 export let STRATEGY: "HTTP" | "WS" = "HTTP";

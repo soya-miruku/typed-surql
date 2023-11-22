@@ -1,6 +1,6 @@
-import "reflect-metadata";
+import "npm:reflect-metadata@latest";
 
-import { Class, Constructor } from "type-fest";
+import { Class, Constructor } from "npm:type-fest@latest";
 import { IFieldParams, ITable, Idx } from "./decerators.ts";
 import { AsBasicModel, CreateInput, IModel, LengthGreaterThanOne, ModelKeysDot, OnlyFields, TransformSelected, UnionToArray } from "./types.ts";
 import { STRATEGY, TypedSurQL } from "./index.ts";

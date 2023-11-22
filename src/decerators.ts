@@ -1,5 +1,5 @@
-import "reflect-metadata";
-import "core-js";
+import "npm:reflect-metadata@latest";
+import "npm:core-js@latest";
 import { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
 import { Optional, TObject, Type } from "npm:@sinclair/typebox";
 

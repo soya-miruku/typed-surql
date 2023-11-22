@@ -1,10 +1,7 @@
 {
   "imports": {
     "dnt": "https://deno.land/x/dnt/mod.ts",
-    "type-fest": "npm:type-fest@latest",
-    "reflect-metadata": "npm:reflect-metadata@latest",
-    "surrealdb.js": "https://deno.land/x/surrealdb/mod.ts",
-    "core-js": "npm:core-js@latest"
+    "surrealdb.js": "https://deno.land/x/surrealdb/mod.ts"
   },
   "scopes": {
   }
