@@ -37,7 +37,7 @@ await TypedSurQL.Wait(5);
 import { Model, Table, Field, OnlyFields, RelationEdge, Relation } from '@soyamiruku/typed-surql';
 import { Lemons } from "./lemons";
 
-@Table({ name: "UserPortfolio" })
+@Table({ name: "eats" })
 export class Eats extends RelationEdge<User, Lemons> { }
 
 @Table({ name: "user" })
