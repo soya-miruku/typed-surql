@@ -19,7 +19,7 @@ $ git clone https://github.com/soya-miruku/typed-surql
 
 ```ts
 # Or Using Deno
-import {TypedSurQL} from 'https://deno.land/x/typed_surql@v1.0.4/mod.ts'
+import {TypedSurQL} from 'https://deno.land/x/typed_surql@v1.0.5/mod.ts'
 
 // initialise the connection
 TypedSurQL.Init(env.DB_URL, {
@@ -34,7 +34,7 @@ TypedSurQL.Init(env.DB_URL, {
 // wait until the connection is made
 await TypedSurQL.Wait(5);
 
-import { Model, Table, Field, OnlyFields, RelationEdge, Relation } from 'https://deno.land/x/typed_surql@v1.0.4/mod.ts';
+import { Model, Table, Field, OnlyFields, RelationEdge, Relation } from 'https://deno.land/x/typed_surql@v1.0.5/mod.ts';
 import { Lemons } from "./lemons";
 
 @Table({ name: "eats" })
@@ -73,7 +73,7 @@ const result = await User.select("*", { fetch: ["lemonsEaten"]});
 
 // query functions
 
-import { query } from '@soyamiruku/typed-surql';
+import { query } from 'https://deno.land/x/typed_surql@v1.0.5/mod.ts';
 
 // field param provides all surrealdb functions / operators and the table name as well allowing you to select the model properties:
 
