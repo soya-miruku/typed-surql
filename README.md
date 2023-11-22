@@ -52,7 +52,6 @@ export class Session extends Model {
   @Field() active_expires!: number;
   @Field() idle_expires!: number;
   @Field() user!: User;
-  @Field() wallet!: string;
 }
 
 @Table({ name: "key" })
