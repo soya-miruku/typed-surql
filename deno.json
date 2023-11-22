@@ -1,0 +1,18 @@
+{
+	"lint": {
+		"files": { "include": ["src/", "./mod.ts", "./compile.ts", "./deno.json"] }
+	},
+	"fmt": {
+		"files": { "include": ["src/", "./mod.ts", "./compile.ts", "./deno.json"] },
+		"options": {
+			"useTabs": true,
+			"lineWidth": 200,
+			"indentWidth": 2,
+			"singleQuote": false
+		}
+	},
+	"tasks": {
+		"build": "deno run -A ./compile.ts && cd npm && npm run build"
+	},
+  "importMap": "./import_map.json"
+}
