@@ -19,7 +19,7 @@ $ git clone https://github.com/soya-miruku/typed-surql
 
 ```ts
 # Or Using Deno
-$ import {TypedSurQL} from 'https://deno.land/x/typed_surql@v1/mod.ts'
+import {TypedSurQL} from 'https://deno.land/x/typed_surql@v1/mod.ts'
 
 // initialise the connection
 TypedSurQL.Init(env.DB_URL, {
