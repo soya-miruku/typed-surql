@@ -1,7 +1,6 @@
 {
   "imports": {
-    "dnt": "https://deno.land/x/dnt/mod.ts",
-    "surrealdb.js": "https://deno.land/x/surrealdb/mod.ts"
+    "dnt": "https://deno.land/x/dnt/mod.ts"
   },
   "scopes": {
   }

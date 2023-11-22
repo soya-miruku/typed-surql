@@ -4,7 +4,7 @@ import { Class, Constructor } from "npm:type-fest@latest";
 import { IFieldParams, ITable, Idx } from "./decerators.ts";
 import { AsBasicModel, CreateInput, IModel, LengthGreaterThanOne, ModelKeysDot, OnlyFields, TransformSelected, UnionToArray } from "./types.ts";
 import { STRATEGY, TypedSurQL } from "./index.ts";
-import { Surreal } from "surrealdb.js";
+import { Surreal } from "https://deno.land/x/surrealdb/mod.ts";
 import { field, val, ql, SQLType, Instance, FnBody, queryModel } from "./query.ts";
 import { ActionResult, LiveQueryResponse, Patch } from "./surreal-types.ts";
 
