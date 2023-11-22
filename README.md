@@ -43,7 +43,7 @@ export class Eats extends RelationEdge<User, Lemons> { }
 @Table({ name: "user" })
 export class User extends Model {
   @Field({ index: { name: "username_idx", search: true } }) username!: string;
-  @Field() wallet!: string;
+  @Field() something!: string;
   @Relation("->", Eats, "->", Lemons) readonly lemonsEaten!: Lemons[];
 }
 
