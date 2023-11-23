@@ -25,6 +25,12 @@ await build({
 			name: "Soya Miruku",
 			url: "",
 		},
+		exports: {
+			".": {
+				"import": "./src/index.ts",
+				"require": "./src/index.js"
+			}
+		},
 		dependencies: {
 			"@sinclair/typebox": "^0.31.28",
 			"surrealdb.js": "latest",
@@ -39,6 +45,9 @@ await build({
 			"@types/ws": "8.5.3",
 			"type-fest": "latest"
 		},
+		peerDependencies: {
+			"typescript": "latest"
+		},
 		scripts: {
 			"build": "esbuild ./esm/index.js --format=esm --minify --bundle --sourcemap --outfile=./dist/index.js",
 		},
@@ -47,6 +56,7 @@ await build({
 	compilerOptions: {
 		lib: ["ESNext", "DOM"],
 		sourceMap: true,
+		emitDecoratorMetadata: true,
 	},
 });
 
