@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://files.oaiusercontent.com/file-JF5lKVEp2mxqbJ94WkF7hO1E?se=2023-11-23T09%3A47%3A38Z&sp=r&sv=2021-08-06&sr=b&rscc=max-age%3D31536000%2C%20immutable&rscd=attachment%3B%20filename%3De60d6697-d6a9-4ae3-b7ef-12ebb54d26d4.webp&sig=t1sj%2BTRCn2TX6Hl1y4AnhqRiwEPVG2XVZJOyrtEGcE8%3D" alt="typed-surql" width="200"></a>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="https://i.postimg.cc/5Nv9t960/file-JF5l-KVEp2mxqb-J94-Wk-F7h-O1-E.jpg" alt="typed-surql" width="200"></a>
   <br>
   Typed-Surql
   <br>
