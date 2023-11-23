@@ -1,0 +1,22 @@
+name: Publish Package to npmjs
+'on':
+  push:
+    tags:
+      - '*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@soyamiruku'
+      - uses: actions/checkout@v3
+      - run: deno task build
+      - run: cd ./npm && npm publish
+        env:
+          NODE_AUTH_TOKEN: '${{secrets.npm_token}}'
