@@ -9,7 +9,7 @@ await build({
 	shims: {
 		// see JS docs for overview and more options
 		deno: false,
-		webSocket: false,
+		webSocket: false
 	},
 	package: {
 		// package.json properties
@@ -52,7 +52,7 @@ await build({
 			"build": "esbuild ./esm/index.js --format=esm --minify --bundle --sourcemap --outfile=./dist/index.js",
 		},
 	},
-	// mappings: { "./src/library/WebSocket/deno.ts": "./src/library/WebSocket/node.ts" },
+	mappings: { "https://deno.land/x/surrealdb/mod.ts": { name: "surrealdb.js", version: "latest" } },
 	compilerOptions: {
 		lib: ["ESNext", "DOM"],
 		sourceMap: true,
