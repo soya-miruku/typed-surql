@@ -1,4 +1,4 @@
-import { ConditionalExcept, ConditionalPick, ConditionalPickDeepOptions, EmptyObject, Except, IsEqual, Merge, ReadonlyKeysOf, Simplify, UnknownRecord } from "npm:type-fest@latest";
+import { ConditionalExcept, ConditionalPick, ConditionalPickDeepOptions, EmptyObject, Except, IsEqual, Merge, ReadonlyKeysOf, Simplify, UnknownRecord } from "npm:type-fest";
 
 /**
 Simplifies a type while including and/or excluding certain types from being simplified. Useful to improve type hints shown in editors. And also to transform an interface into a type to aide with assignability.

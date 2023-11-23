@@ -34,6 +34,7 @@ await build({
 			"ws": "^8.13.0",
 		},
 		devDependencies: {
+			"esbuild": "latest",
 			"@types/node": "^18.7.18",
 			"@types/ws": "8.5.3",
 			"type-fest": "latest"
