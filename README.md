@@ -18,6 +18,12 @@ $ git clone https://github.com/soya-miruku/typed-surql
 ```
 
 ```ts
+ ensure you have enabled the following in your tsconfig file:
+  "emitDecoratorMetadata": true,
+  "experimentalDecorators": true,
+```
+
+```ts
 # Or Using Deno
 import {TypedSurQL} from 'https://deno.land/x/typed_surql@v1.0.18/mod.ts';
 # Or npm/bun
