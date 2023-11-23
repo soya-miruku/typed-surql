@@ -1,5 +1,6 @@
-import "npm:reflect-metadata@latest";
-import "npm:core-js@latest";
+import "npm:reflect-metadata";
+import "npm:core-js";
+
 import { ExperimentalSurrealHTTP, Surreal } from "https://deno.land/x/surrealdb/mod.ts";
 import { AsyncReturnType } from "npm:type-fest";
 import { ConnectionOptions } from "./surreal-types.ts";
@@ -73,8 +74,7 @@ export class TypedSurQL<Strategy extends StrategyType = "WS"> {
   }
 }
 
-
-export * from "./decerators.ts";
+export * as Q from './helpers.ts';
 export type * from "./types.ts";
 export * from './client.ts';
 export * as query from './query.ts';

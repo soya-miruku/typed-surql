@@ -12,13 +12,14 @@ export type SQLType = [string, string];
 export type Instance<SubModel extends Constructor<IModel>> = Simplify<OnlyFields<InstanceType<SubModel>>>
 export interface FnBody<InstanceType> extends Context, Operation {
   (k: DotNestedKeys<InstanceType> | InstanceType | InstanceType[]): qlFn;
-  table: qlFn;
+  TABLE: qlFn;
   ql: typeof ql;
   field: (k: DotNestedKeys<InstanceType> | InstanceType | InstanceType[]) => qlFn;
 }
 
 export const context = {
   VALUE: qlFn.create("VALUE"),
+  LIMIT: (limit: number) => qlFn.create(`LIMIT ${limit}`),
   val: val,
   string: strings,
   array: arrays,
@@ -86,7 +87,7 @@ export function queryModel<M extends Constructor<Model>, T, Ins = Instance<M>>(m
     return field(JSON.stringify(k), false);
   }
 
-  const fnBody = Object.assign(baseFn, context, operations, { table: field(instance.tableName), ql: ql<T>, field: baseFn }) as FnBody<Ins>;
+  const fnBody = Object.assign(baseFn, context, operations, { TABLE: field(instance.tableName), ql: ql<T>, field: baseFn }) as FnBody<Ins>;
 
   const [letStatements, finalQuery] = fn(ql<T>, fnBody);
   const full = letStatements + finalQuery;

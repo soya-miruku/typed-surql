@@ -25,7 +25,7 @@ $ git clone https://github.com/soya-miruku/typed-surql
 
 ```ts
 # Or Using Deno
-import {TypedSurQL} from 'https://deno.land/x/typed_surql@v1.0.18/mod.ts';
+import {TypedSurQL} from 'https://deno.land/x/typed_surql@v1.0.20/mod.ts';
 # Or npm/bun
 import { TypedSurQL } from '@soyamiruku/typed-surl';
 
@@ -41,38 +41,37 @@ TypedSurQL.Init(env.DB_URL, {
 
 // wait until the connection is made
 await TypedSurQL.Wait(5);
-
-import { Model, Table, Field, OnlyFields, RelationEdge, Relation } from 'https://deno.land/x/typed_surql@v1.0.18/mod.ts';
+import { TypedSurQL, Model, Q, RelationEdge } from '../src/index.ts';
 import { Lemons } from "./lemons";
 
-@Table({ name: "eats" })
+@Q.Table({ name: "eats" })
 export class Eats extends RelationEdge<User, Lemons> { }
 
-@Table({ name: "user" })
+@Q.Table({ name: "user" })
 export class User extends Model {
-  @Field({ index: { name: "username_idx", search: true } }) username!: string;
-  @Field() something!: string;
-  @Relation("->", Eats, "->", Lemons) readonly lemonsEaten!: Lemons[];
+  @Q.Field({ index: { name: "username_idx", search: true } }) username!: string;
+  @Q.Field() something!: string;
+  @Q.Relation("->", Eats, "->", Lemons) readonly lemonsEaten!: Lemons[];
 }
 
-@Table({ name: "session" })
+@Q.Table({ name: "session" })
 export class Session extends Model {
-  @Field() active_expires!: number;
-  @Field() idle_expires!: number;
-  @Field() user!: User;
+  @Q.Field() active_expires!: number;
+  @Q.Field() idle_expires!: number;
+  @Q.Field() user!: User;
 }
 
-@Table({ name: "key" })
+@Q.Table({ name: "key" })
 export class Account extends Model {
-  @Field() hashed_password?: string | null;
-  @Field() key_id!: string;
-  @Field() user!: User;
+  @Q.Field() hashed_password?: string | null;
+  @Q.Field() key_id!: string;
+  @Q.Field() user!: User;
 }
 
 // Defines the object types with only the properties
-export type UserObject = OnlyFields<User>;
-export type SessionObject = OnlyFields<Session>;
-export type AccountObject = OnlyFields<Account>;
+export type UserObject = Q.Static<User>;
+export type SessionObject = Q.Static<Session>;
+export type AccountObject = Q.Static<Account>;
 
 // Perform queries
 
@@ -80,11 +79,17 @@ const result = await User.select("*", { fetch: ["lemonsEaten"]});
 
 // query functions
 
-import { query } from 'https://deno.land/x/typed_surql@v1.0.18/mod.ts';
+import { query } from 'https://deno.land/x/typed_surql@v1.0.20/mod.ts';
 
 // field param provides all surrealdb functions / operators and the table name as well allowing you to select the model properties:
 
-query.queryModel(User, (q, field) => q`SELECT *, ${field.string.uppercase(field("username")).as("cap_username")} FROM ${field.table} WHERE ${field("id")} = ....`)
+query.queryModel(User, (q, field) => q`SELECT *, ${field.string.uppercase(field("username")).as("cap_username")} FROM ${field.TABLE} WHERE ${field("id")} = ....`)
+// or you can do
+User.query((q, { VALUE, TABLE, field }) => ....)....
+```
+
+```txt
+  There is also an example folder with you can check out
 ```
 
 > **Note**

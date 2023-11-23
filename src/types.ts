@@ -1,4 +1,5 @@
-import { ConditionalExcept, ConditionalPick, ConditionalPickDeepOptions, EmptyObject, Except, IsEqual, Merge, ReadonlyKeysOf, Simplify, UnknownRecord } from "npm:type-fest";
+import { ConditionalExcept, ConditionalPick, ConditionalPickDeepOptions, EmptyObject, Except, IsEqual, Merge, ReadonlyKeysOf, SetNonNullable, SetOptional, SetRequired, Simplify, UnknownRecord } from "npm:type-fest";
+import { RequiredDeep } from "npm:type-fest";
 
 /**
 Simplifies a type while including and/or excluding certain types from being simplified. Useful to improve type hints shown in editors. And also to transform an interface into a type to aide with assignability.
@@ -144,7 +145,7 @@ export type DotPrefix<T extends string, Prefix extends string = "."> = T extends
 export type DotNestedKeys<T> = T extends IModel ? "" :
   (T extends object
     ? { [K in Exclude<keyof T, symbol>]:
-      T[K] extends Array<infer R> ? K
+  T[K] extends Array<infer R> ? `${K}` | `${K}${DotPrefix<DotNestedKeys<R>>}`
       : T[K] extends object ? `${K}` | `${K}${DotPrefix<DotNestedKeys<T[K]>>}`
       : `${K}${DotPrefix<DotNestedKeys<T[K]>>}`
     }[Exclude<keyof T, symbol>]
@@ -187,10 +188,12 @@ export type AsBasicModel<T> = {
   : T[P];
 };
 
+export type NonNullableVersion<SubModel> = SetRequired<SubModel, keyof ConditionalPick<SubModel, IModel | (IModel | undefined)>>
+
 export type AsBoth<T> = {
-  [P in keyof T]: T[P] extends IModel
+  [P in keyof T]: T[P] extends IModel | (IModel | undefined)
   ? string | T[P]
-  : T[P] extends IModel[]
+  : T[P] extends OfArray<IModel>
   ? string[] | T[P][]
   : T[P] extends Date
   ? T[P]
@@ -201,4 +204,5 @@ export type AsBoth<T> = {
   : T[P];
 };
 
-export type CreateInput<SubModel extends IModel, Cleaned = RemoveReadonly<SubModel>> = AsBoth<OnlyFields<Cleaned>>;
+export type OptionalIdModel<T extends IModel> = SetOptional<T, "id">;
+export type CreateInput<SubModel extends IModel, Optional = OptionalIdModel<SubModel>, Cleaned = RemoveReadonly<Optional>> = AsBoth<OnlyFields<Cleaned>>;

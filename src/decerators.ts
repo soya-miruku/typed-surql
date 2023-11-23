@@ -1,5 +1,5 @@
-import "npm:reflect-metadata@latest";
-import "npm:core-js@latest";
+import "npm:reflect-metadata";
+import "npm:core-js";
 import { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
 import { Optional, TObject, Type } from "npm:@sinclair/typebox";
 
@@ -57,6 +57,7 @@ export function Field<SubModel extends IModel, Types extends TObject>(fieldProps
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
     const type = Reflect.getMetadata("design:type", target, propertyKey.toString());
+    if (!type) throw new Error("Type not found")
     const isObject = type.name === "Object";
     const field = {
       name,

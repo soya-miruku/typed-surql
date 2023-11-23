@@ -1,4 +1,4 @@
-import "npm:reflect-metadata@latest";
+import "npm:reflect-metadata";
 
 import { Class, Constructor } from "npm:type-fest";
 import { IFieldParams, ITable, Idx } from "./decerators.ts";
