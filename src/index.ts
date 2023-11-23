@@ -2,8 +2,8 @@ import "npm:reflect-metadata";
 import "npm:core-js";
 
 import { ExperimentalSurrealHTTP, Surreal } from "https://deno.land/x/surrealdb/mod.ts";
-import { AsyncReturnType } from "npm:type-fest";
-import { ConnectionOptions } from "./surreal-types.ts";
+import type { AsyncReturnType } from "npm:type-fest";
+import type { ConnectionOptions } from "./surreal-types.ts";
 
 export type StrategyType = "HTTP" | "WS";
 export type SurrealClient = AsyncReturnType<typeof TypedSurQL['Init']>;
