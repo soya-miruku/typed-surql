@@ -51,4 +51,4 @@ await build({
 });
 
 // post build steps
-Deno.copyFileSync(".npmrc", "npm/.npmrc");
+Deno.copyFileSync("README.md", "npm/README.md");
