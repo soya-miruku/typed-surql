@@ -7,8 +7,8 @@
   <br>
 </h1>
 
-<h4 align="center">A minimal typed ORM <a href="https://github.com/surrealdb/surrealdb.js" target="_blank">Surrealdb.js</a>.</h4>
-
+<h4 align="center">A minimal typed ORM built on top of <a href="https://github.com/surrealdb/surrealdb.js" target="_blank">Surrealdb.js</a>.</h4>
+<h3> Note that there are still some features that have not been completed, such as migrations, schema generation</h3>
 
 ## How To Use
 
