@@ -7,6 +7,7 @@ import { TypedSurQL } from "./index.ts";
 import { Surreal } from "https://deno.land/x/surrealdb/mod.ts";
 import { field, val, ql, SQLType, Instance, FnBody, queryModel } from "./query.ts";
 import { ActionResult, LiveQueryResponse, Patch } from "./surreal-types.ts";
+import { floatJSONReplacer } from "./parsers.ts";
 
 export type InfoForTable = {
   events: Record<string, string>;
@@ -131,9 +132,7 @@ export class Model implements IModel {
     for (const [key, value] of Object.entries(props))
       transformedProps[key] = instance.transform(key, value as object | Model);
 
-    // Object.assign(this, props);
-    return await TypedSurQL.SurrealDB.query(`CREATE ${instance.tableName} CONTENT ${JSON.stringify(transformedProps)}`, { value: transformedProps }) as ActionResult<OnlyFields<SubModel>, CreateInput<SubModel>>[];
-    // return await SurrealDb.create(instance.tableName, transformedProps) as ActionResult<OnlyFields<SubModel>, CreateInput<SubModel>>[];
+    return await TypedSurQL.SurrealDB.query(`CREATE ${instance.tableName} CONTENT ${JSON.stringify(transformedProps, floatJSONReplacer, 2)}`, { value: transformedProps }) as ActionResult<OnlyFields<SubModel>, CreateInput<SubModel>>[];
   }
 
   private transform(key: string, value: object | Model) {
@@ -183,9 +182,9 @@ export class Model implements IModel {
     if (TypedSurQL.STRATEGY === "HTTP") {
       if (Array.isArray(transformedData)) {
         if (!transformedData.length) return [];
-        return await TypedSurQL.SurrealDB.query(`INSERT INTO ${instance.tableName} ${JSON.stringify(transformedData)}`)
+        return await TypedSurQL.SurrealDB.query(`INSERT INTO ${instance.tableName} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`)
       } else {
-        return await TypedSurQL.SurrealDB.query(`INSERT INTO ${instance.tableName} ${JSON.stringify(transformedData)}`)
+        return await TypedSurQL.SurrealDB.query(`INSERT INTO ${instance.tableName} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`)
       }
     }
 
