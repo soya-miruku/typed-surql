@@ -209,7 +209,8 @@ export class Model implements IModel {
 
   public static async delete<SubModel extends Model>(this: { new(): SubModel }, id?: string): Promise<ActionResult<AsBasicModel<SubModel>>[]> {
     const instance = new this();
-    return await TypedSurQL.SurrealDB.delete<AsBasicModel<SubModel>>(instance.tableName + (id ? `:${id}` : ''));
+    const thing = id ? id.includes(":") ? id : `${instance.tableName}:${id}` : instance.tableName;
+    return await TypedSurQL.SurrealDB.delete<AsBasicModel<SubModel>>(thing);
   }
 
   public static async relate<SubModel extends Model, Via extends Constructor<Model>, To extends Constructor<Model>>(this: { new(props?: Partial<Model>): SubModel }, id: string, via: [Via, string] | Via, to: [To, string]): Promise<ActionResult<AsBasicModel<SubModel>>[]> {
