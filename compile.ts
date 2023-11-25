@@ -35,7 +35,6 @@ await build({
 			"@sinclair/typebox": "^0.31.28",
 			"surrealdb.js": "latest",
 			"reflect-metadata": "0.1.13",
-			"core-js": "^3.33.3",
 			"unws": "^0.2.3",
 			"ws": "^8.13.0",
 		},
@@ -43,7 +42,7 @@ await build({
 			"esbuild": "latest",
 			"@types/node": "^18.7.18",
 			"@types/ws": "8.5.3",
-			"type-fest": "latest"
+			"type-fest": "^4.8.2",
 		},
 		peerDependencies: {
 			"typescript": "latest"

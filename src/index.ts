@@ -1,6 +1,4 @@
 import "npm:reflect-metadata";
-import "npm:core-js";
-
 import { ExperimentalSurrealHTTP, Surreal } from "https://deno.land/x/surrealdb/mod.ts";
 import type { AsyncReturnType } from "npm:type-fest";
 import type { ConnectionOptions } from "./surreal-types.ts";

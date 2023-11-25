@@ -1,9 +1,9 @@
-import { Constructor, Simplify } from "npm:type-fest";
+import type { Constructor, Simplify } from "npm:type-fest";
 import { qlFn } from "./functions/index.ts";
 import { DotNestedKeys, IModel, OnlyFields } from "./types.ts";
 import { alias, arrays, count, cryptos, durations, http, math, meta, operations, parse, rands, search, session, strings, time } from "./functions/mod.ts";
 import { TypedSurQL } from "./index.ts";
-import { Model } from "./client.ts";
+import { Model, getField } from "./client.ts";
 import { RawQueryResult } from "./surreal-types.ts";
 
 export type StringContains<T extends string, U extends string> = T extends `${string}${U}${string}` ? true : false;
@@ -81,7 +81,7 @@ export function queryModel<M extends Constructor<Model>, T, Ins = Instance<M>>(m
   const instance = new m();
 
   const baseFn = (k: DotNestedKeys<Ins> | Ins | Ins[]) => {
-    const f = instance.field(k as keyof Model);
+    const f = getField(m, k as keyof Model)// instance.field(k as keyof Model);
     if (f && f.type === "Relation" && f.params) return field(`${f.params.dirVia}${f.params.via.name}${f.params.dirTo}${f.params.to.name} as ${f.name}`, false);
     if (typeof k === "string") return field(k as string, false);
     return field(JSON.stringify(k), false);

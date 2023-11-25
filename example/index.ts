@@ -1,6 +1,6 @@
 import "npm:reflect-metadata";
-import "npm:core-js";
-import { TypedSurQL, Model, Q, RelationEdge } from '../src/index.ts';
+
+import { TypedSurQL, Model, Q, RelationEdge } from '../mod.ts';
 
 await TypedSurQL.Init("http://127.0.0.1:8000", {
   auth: {
@@ -27,6 +27,8 @@ class User extends Model {
   @Q.Field({}, todo) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
   @Q.Record(User) bestFriend?: User
 }
+
+function test(user: User) { }
 
 export type UserObject = Q.Static<User>;
 export type Todo = Q.Static<typeof todo>;
@@ -81,7 +83,7 @@ console.log(aliasValue);
  * [ [ false ], [ false, true ], [ false ] ]
  */
 
-const stringFnc = await User.query((q, { LIMIT, TABLE, field, string }) => q`SELECT ${string.uppercase(field("name")).as("upper_name")} FROM ${TABLE} ${LIMIT(2)}`).exec();
+const stringFnc = await User.query((q, { LIMIT, TABLE, field, string, meta }) => q`SELECT ${string.uppercase(field("name")).as("upper_name")} FROM ${TABLE} ${LIMIT(2)}`).exec();
 console.log(stringFnc);
 
 /** RETURNS (AS AN EXAMPLE)

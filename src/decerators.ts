@@ -1,6 +1,5 @@
 import "npm:reflect-metadata";
-import "npm:core-js";
-import { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
+import type { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
 import { Optional, TObject, Type } from "npm:@sinclair/typebox";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {

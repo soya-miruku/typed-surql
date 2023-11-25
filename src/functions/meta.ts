@@ -1,4 +1,4 @@
-import { Constructor } from 'npm:type-fest';
+import type { Constructor } from 'npm:type-fest';
 import { qlFn } from './index.ts'
 import { IModel } from '../types.ts';
 
