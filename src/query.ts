@@ -8,7 +8,17 @@ import { RawQueryResult } from "./surreal-types.ts";
 
 export type StringContains<T extends string, U extends string> = T extends `${string}${U}${string}` ? true : false;
 export type SQLInput<T extends string> = StringContains<T, "'"> extends true ? "USE VARS, INSTEAD OF '" : T;
-export type SQLType = [string, string];
+export class SQL {
+  constructor(protected readonly q: string[]) { }
+  static Create(q: [string, string]) {
+    return new SQL(q);
+  }
+
+  toString() {
+    return this.q.join("\n");
+  }
+} 
+
 export type Instance<SubModel extends Constructor<IModel>> = Simplify<OnlyFields<InstanceType<SubModel>>>
 export interface FnBody<InstanceType> extends Context, Operation {
   (k: DotNestedKeys<InstanceType> | InstanceType | InstanceType[]): qlFn;
@@ -44,11 +54,8 @@ export function val(value: string) {
   return qlFn.create(`${value}`);
 }
 
-export function field(value: string, addcomma?: boolean) {
-  return qlFn.create(`${value}${addcomma ? "," : ""}`);
-}
 
-export function ql<T>(strings: TemplateStringsArray, ...values: unknown[]): [string, string] {
+export function ql<T>(strings: TemplateStringsArray, ...values: unknown[]): SQL {
   let finalQuery = '';
   let letStatements = '';
 
@@ -58,6 +65,7 @@ export function ql<T>(strings: TemplateStringsArray, ...values: unknown[]): [str
       finalQuery += strings[i] + value;
       continue;
     }
+
     if (typeof value === "object" && !Array.isArray(value) && value !== null) {
       const [varName, obj] = Object.entries(value)[0];
       letStatements += `LET $${varName} = ${obj instanceof qlFn ? obj.toString() : typeof obj === "string" ? obj.includes(":") ? obj : JSON.stringify(obj) : JSON.stringify(obj)};\n`;
@@ -68,29 +76,29 @@ export function ql<T>(strings: TemplateStringsArray, ...values: unknown[]): [str
   }
 
   finalQuery += strings[strings.length - 1];
-  return [letStatements, finalQuery];
+  return SQL.Create([letStatements, finalQuery]);
 }
 
 export async function raw<T>(strings: TemplateStringsArray, ...value: unknown[]) {
   const q = ql(strings, ...value);
-  const full = q[0] + q[1];
+  const full = q.toString()
   return (await TypedSurQL.SurrealDB.query(full)).at(-1) as T;
 }
 
-export function queryModel<M extends Constructor<Model>, T, Ins = Instance<M>>(m: M, fn: (q: typeof ql<T>, field: FnBody<Ins>) => [string, string]) {
+export function queryModel<M extends Constructor<Model>, T, Ins = Instance<M>>(m: M, fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL) {
   const instance = new m();
 
   const baseFn = (k: DotNestedKeys<Ins> | Ins | Ins[]) => {
     const f = getField(m, k as keyof Model)// instance.field(k as keyof Model);
-    if (f && f.type === "Relation" && f.params) return field(`${f.params.dirVia}${f.params.via.name}${f.params.dirTo}${f.params.to.name} as ${f.name}`, false);
-    if (typeof k === "string") return field(k as string, false);
-    return field(JSON.stringify(k), false);
+    if (f && f.type === "Relation" && f.params) return val(`${f.params.dirVia}${f.params.via.name}${f.params.dirTo}${f.params.to.name} as ${f.name}`);
+    if (typeof k === "string") return val(k as string);
+    return val(JSON.stringify(k));
   }
 
-  const fnBody = Object.assign(baseFn, context, operations, { TABLE: field(instance.tableName), ql: ql<T>, field: baseFn }) as FnBody<Ins>;
+  const fnBody = Object.assign(baseFn, context, operations, { TABLE: val(instance.tableName), ql: ql<T>, field: baseFn }) as FnBody<Ins>;
 
-  const [letStatements, finalQuery] = fn(ql<T>, fnBody);
-  const full = letStatements + finalQuery;
+  const sql = fn(ql<T>, fnBody);
+  const full = sql.toString();
   return {
     exec: async <TResponse extends RawQueryResult[]>() => (await TypedSurQL.SurrealDB.query<TResponse>(full)).at(-1) as TResponse,
   }
@@ -98,13 +106,13 @@ export function queryModel<M extends Constructor<Model>, T, Ins = Instance<M>>(m
 
 export function rawFn() {
   let full = "";
-  return function inner<M extends Model, Ins = Simplify<OnlyFields<InstanceType<Constructor<M>>>>>(fn: (q: typeof ql, field: ((k: DotNestedKeys<Ins> | Ins | Ins[]) => qlFn), context: Context, op: Operation) => [string, string]) {
-    const [letStatements, finalQuery] = fn(ql, (k) => {
-      if (typeof k === "string") return field(k as string, false);
-      return field(JSON.stringify(k), false);
+  return function inner<M extends Model, Ins = Simplify<OnlyFields<InstanceType<Constructor<M>>>>>(fn: (q: typeof ql, field: ((k: DotNestedKeys<Ins> | Ins | Ins[]) => qlFn), context: Context, op: Operation) => SQL) {
+    const sql = fn(ql, (k) => {
+      if (typeof k === "string") return val(k as string);
+      return val(JSON.stringify(k));
     }, context, operations);
 
-    full += letStatements + finalQuery;
+    full += sql.toString();
     return {
       pipe: inner,
       exec: async <TResponse extends RawQueryResult[]>() => {

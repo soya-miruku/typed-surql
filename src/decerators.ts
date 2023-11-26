@@ -1,6 +1,6 @@
 import "npm:reflect-metadata";
-import type { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
 import { Optional, TObject, Type } from "npm:@sinclair/typebox";
+import type { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {
   name: string;
@@ -55,8 +55,8 @@ export function Field<SubModel extends IModel, Types extends TObject>(fieldProps
   return function (target: SubModel, propertyKey: keyof SubModel) {
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
-    const type = Reflect.getMetadata("design:type", target, propertyKey.toString());
-    if (!type) throw new Error("Type not found")
+    let type = Reflect.getMetadata("design:type", target, propertyKey.toString());
+    type = type ?? { name: "unknown" }
     const isObject = type.name === "Object";
     const field = {
       name,
@@ -81,7 +81,8 @@ export function Record<ModelType extends Constructor<IModel>>(recType: ModelType
   return function <SubModel extends IModel>(target: SubModel, propertyKey: keyof SubModel) {
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
-    const type = Reflect.getMetadata("design:type", target, propertyKey.toString());
+    let type = Reflect.getMetadata("design:type", target, propertyKey.toString());
+    type = type ?? { name: "unknown" }
     const isArray = type.name === "Array";
     const isObject = type.name === "Object";
     const field = {

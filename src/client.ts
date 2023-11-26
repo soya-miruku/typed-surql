@@ -1,9 +1,9 @@
-import { Class, Constructor } from "npm:type-fest";
+import type { Class, Constructor } from "npm:type-fest";
+import { Surreal } from "https://deno.land/x/surrealdb/mod.ts";
 import { IFieldParams, ITable, Idx } from "./decerators.ts";
 import type { AsBasicModel, CreateInput, IModel, LengthGreaterThanOne, ModelKeysDot, OnlyFields, TransformSelected, UnionToArray } from "./types.ts";
 import { TypedSurQL } from "./index.ts";
-import { Surreal } from "https://deno.land/x/surrealdb/mod.ts";
-import { field, val, ql, SQLType, Instance, FnBody, queryModel } from "./query.ts";
+import { val, ql, SQL, Instance, FnBody, queryModel } from "./query.ts";
 import { ActionResult, LiveQueryResponse, Patch } from "./surreal-types.ts";
 import { floatJSONReplacer } from "./parsers.ts";
 
@@ -26,8 +26,7 @@ export function getTable<SubModel extends Model>(ctor: Class<SubModel>): ITable<
 export function getFields<SubModel extends Model>(ctor: Class<SubModel>): IFieldParams<SubModel>[] {
   const fields = Reflect.getMetadata("fields", ctor, ctor.name) as IFieldParams<SubModel>[];
   const id = Reflect.getMetadata("Idx", ctor) as IFieldParams<SubModel>;
-  if (id) fields.unshift(id);
-  return fields;
+  return id ? fields.concat(id) : fields;
 }
 
 export function getField<SubModel extends Model>(ctor: Class<SubModel>, name: keyof SubModel): IFieldParams<SubModel> {
@@ -76,15 +75,15 @@ export class Model implements IModel {
 
     const tableIndexes = table?.indexes;
     if (tableIndexes) {
-      const columns = tableIndexes.columns.map((column) => field(column as string));
-      const index = field(`DEFINE INDEX ${columns.at(0)}_${columns.at(-1)}_${tableIndexes.suffix ?? "idx"} ON TABLE ${tableName} COLUMNS ${columns.join(", ")} ${tableIndexes.unique ? val("UNIQUE") : ""} ${tableIndexes.search ? "SEARCH ANALYZER ascii BM25 HIGHLIGHTS" : ""};`);
+      const columns = tableIndexes.columns.map((column) => val(column as string));
+      const index = val(`DEFINE INDEX ${columns.at(0)}_${columns.at(-1)}_${tableIndexes.suffix ?? "idx"} ON TABLE ${tableName} COLUMNS ${columns.join(", ")} ${tableIndexes.unique ? val("UNIQUE") : ""} ${tableIndexes.search ? "SEARCH ANALYZER ascii BM25 HIGHLIGHTS" : ""};`);
       queries.push(index.toString());
     }
 
     for (const field of fields) {
       if (field.index && !info.indexes[field.index.name]) {
         const query = ql`DEFINE INDEX ${val(field.index.name)} ON TABLE ${val(tableName)} COLUMNS ${val(field.name as string)} ${field.index.unique ? val("UNIQUE") : ""} ${field.index.search ? "SEARCH ANALYZER ascii BM25 HIGHLIGHTS" : ""};`;
-        queries.push(query[0] + query[1]);
+        queries.push(query.toString());
       }
     }
 
@@ -108,7 +107,8 @@ export class Model implements IModel {
       fetch?: Fetch[],
       id?: string,
       value?: WithValue extends LengthGreaterThanOne<UnionToArray<Key>> ? false : WithValue,
-      where?: SQLType
+      where?: SQL
+      logQuery?: boolean
     }
   ): Promise<TransformSelected<SubModel, Key, Fetch, WithValue>[]> {
     const tableName = getTableName(this);
@@ -130,8 +130,10 @@ export class Model implements IModel {
       return `${field.name as string}`;
     });
 
+
     const from = options?.id ? options?.id.includes(":") ? `${tableName}:${options?.id.split(":")[1]}` : `${tableName}:${options?.id}` : tableName;
-    const query = `SELECT${options?.value ? " VALUE" : ""} ${selections.join(", ")} FROM ${from}${options?.where ? ` WHERE ${options?.where}` : ""}${options?.fetch && options?.fetch.length > 0 ? ` FETCH ${options?.fetch.join(", ")}` : ""}`;
+    const query = `SELECT${options?.value ? " VALUE" : ""} ${selections.join(", ")} FROM ${from}${options?.where ? ` WHERE ${options?.where.toString()}` : ""}${options?.fetch && options?.fetch.length > 0 ? ` FETCH ${options?.fetch.join(", ")}` : ""}`;
+    options?.logQuery && console.log(query);
     return (await TypedSurQL.SurrealDB.query(query)).at(-1) as TransformSelected<SubModel, Key, Fetch, WithValue>[];
   }
 
@@ -206,7 +208,7 @@ export class Model implements IModel {
     return await TypedSurQL.SurrealDB.query(`RELATE ${`${getTableName(this)}:${id}`}->${viaName}->${`${toTableName}:${to[1]}`};`);
   }
 
-  public static query<SubModel extends Model, T, Ins = Instance<Constructor<SubModel>>>(this: { new(): SubModel }, fn: (q: typeof ql<T>, field: FnBody<Ins>) => [string, string]) {
+  public static query<SubModel extends Model, T, Ins = Instance<Constructor<SubModel>>>(this: { new(): SubModel }, fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL) {
     return queryModel(this, fn);
   }
 }

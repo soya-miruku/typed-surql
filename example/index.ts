@@ -1,6 +1,6 @@
 import "npm:reflect-metadata";
 
-import { TypedSurQL, Model, Q, RelationEdge } from '../mod.ts';
+import { TypedSurQL, Model, Q, RelationEdge, query } from '../mod.ts';
 
 await TypedSurQL.Init("http://127.0.0.1:8000", {
   auth: {
@@ -33,10 +33,10 @@ function test(user: User) { }
 export type UserObject = Q.Static<User>;
 export type Todo = Q.Static<typeof todo>;
 
-await User.create({ id: "user:0", name: "henry", todos: [{ title: "test", completed: false }] });
+await User.create({ name: "henry", todos: [{ title: "test", completed: false }] });
 await User.create({ name: "bingo", bestFriend: "user:0", todos: [{ title: "test", completed: false }, { title: "test2", completed: true }] });
 
-const result = await User.select(["todos", "friends", "bestFriend"], { fetch: ["friends", "bestFriend"] });
+const result = await User.select(["todos", "friends", "bestFriend"], { fetch: ["friends", "bestFriend"], where: query.ql`name = "henry"` });
 console.log(result)
 
 /** RETURNS (AS AN EXAMPLE)
