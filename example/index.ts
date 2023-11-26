@@ -1,6 +1,7 @@
 import "npm:reflect-metadata";
 
 import { TypedSurQL, Model, Q, RelationEdge, query } from '../mod.ts';
+import { magic } from "../src/query.ts";
 
 await TypedSurQL.Init("http://127.0.0.1:8000", {
   auth: {
@@ -89,3 +90,12 @@ console.log(stringFnc);
 /** RETURNS (AS AN EXAMPLE)
  * [ { upper_name: "MILK" } ]
  */
+
+class Test extends Model {
+  @Q.Field() name!: string
+}
+
+const testx = await magic(User, (q, f) => q`SELECT ${f("todos.completed")} FROM ${f.TABLE}`)
+  .pipe(Friends, (q, f) => q`SELECT * FROM ${f.TABLE}`)
+  .pipe(Test, (q, f) => q`SELECT "HELLO" from ${f.TABLE}`)
+  .exec();

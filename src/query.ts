@@ -3,7 +3,7 @@ import { qlFn } from "./functions/index.ts";
 import { DotNestedKeys, IModel, OnlyFields } from "./types.ts";
 import { alias, arrays, count, cryptos, durations, http, math, meta, operations, parse, rands, search, session, strings, time } from "./functions/mod.ts";
 import { TypedSurQL } from "./index.ts";
-import { Model, getField } from "./client.ts";
+import { Model, getField, getTableName } from "./client.ts";
 import { RawQueryResult } from "./surreal-types.ts";
 
 export type StringContains<T extends string, U extends string> = T extends `${string}${U}${string}` ? true : false;
@@ -85,39 +85,23 @@ export async function raw<T>(strings: TemplateStringsArray, ...value: unknown[])
   return (await TypedSurQL.SurrealDB.query(full)).at(-1) as T;
 }
 
-export function queryModel<M extends Constructor<Model>, T, Ins = Instance<M>>(m: M, fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL) {
-  const instance = new m();
-
+export function magic<M extends Constructor<Model>, T, Ins = Instance<M>>(m: M, fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL, currentSql = "") {
   const baseFn = (k: DotNestedKeys<Ins> | Ins | Ins[]) => {
-    const f = getField(m, k as keyof Model)// instance.field(k as keyof Model);
+    const f = getField(m, k as keyof Model);
     if (f && f.type === "Relation" && f.params) return val(`${f.params.dirVia}${f.params.via.name}${f.params.dirTo}${f.params.to.name} as ${f.name}`);
     if (typeof k === "string") return val(k as string);
     return val(JSON.stringify(k));
   }
 
-  const fnBody = Object.assign(baseFn, context, operations, { TABLE: val(instance.tableName), ql: ql<T>, field: baseFn }) as FnBody<Ins>;
+  const fnBody = Object.assign(baseFn, context, operations, { TABLE: val(getTableName(m)), ql: ql<T>, field: baseFn }) as FnBody<Ins>;
 
   const sql = fn(ql<T>, fnBody);
-  const full = sql.toString();
+  currentSql += sql.toString() + ";";
   return {
-    exec: async <TResponse extends RawQueryResult[]>() => (await TypedSurQL.SurrealDB.query<TResponse>(full)).at(-1) as TResponse,
-  }
-}
-
-export function rawFn() {
-  let full = "";
-  return function inner<M extends Model, Ins = Simplify<OnlyFields<InstanceType<Constructor<M>>>>>(fn: (q: typeof ql, field: ((k: DotNestedKeys<Ins> | Ins | Ins[]) => qlFn), context: Context, op: Operation) => SQL) {
-    const sql = fn(ql, (k) => {
-      if (typeof k === "string") return val(k as string);
-      return val(JSON.stringify(k));
-    }, context, operations);
-
-    full += sql.toString();
-    return {
-      pipe: inner,
-      exec: async <TResponse extends RawQueryResult[]>() => {
-        return (await TypedSurQL.SurrealDB.query<TResponse>(full)).at(-1) as TResponse
-      },
-    };
+    pipe: <NewModel extends Constructor<Model>>(newModel: NewModel, fn: (q: typeof ql<T>, field: FnBody<Instance<NewModel>>) => SQL) => magic(newModel, fn, currentSql),
+    exec: async <TResponse extends RawQueryResult[]>() => {
+      if (!currentSql) throw new Error("No query was provided")
+      return (await TypedSurQL.SurrealDB.query<TResponse>(currentSql)).at(-1) as TResponse
+    }
   }
 }

@@ -3,7 +3,7 @@ import { Surreal } from "https://deno.land/x/surrealdb/mod.ts";
 import { IFieldParams, ITable, Idx } from "./decerators.ts";
 import type { AsBasicModel, CreateInput, IModel, LengthGreaterThanOne, ModelKeysDot, OnlyFields, TransformSelected, UnionToArray } from "./types.ts";
 import { TypedSurQL } from "./index.ts";
-import { val, ql, SQL, Instance, FnBody, queryModel } from "./query.ts";
+import { val, ql, SQL, Instance, FnBody, magic } from "./query.ts";
 import { ActionResult, LiveQueryResponse, Patch } from "./surreal-types.ts";
 import { floatJSONReplacer } from "./parsers.ts";
 
@@ -16,11 +16,12 @@ export type InfoForTable = {
 }
 
 export function getTableName<SubModel extends Model>(ctor: Class<SubModel>): string {
-  return Reflect.getMetadata("table", ctor).name;
+  return Reflect.getMetadata("table", ctor)?.name ?? ctor.name;
 }
 
-export function getTable<SubModel extends Model>(ctor: Class<SubModel>): ITable<SubModel> {
-  return Reflect.getMetadata("table", ctor) as ITable<SubModel>;
+export function getTable<SubModel extends Model>(ctor: Class<SubModel>): ITable<SubModel> | undefined {
+  const res = Reflect.getMetadata("table", ctor);
+  return res ? res as ITable<SubModel> : undefined
 }
 
 export function getFields<SubModel extends Model>(ctor: Class<SubModel>): IFieldParams<SubModel>[] {
@@ -58,7 +59,9 @@ export function transform(key: string, value: object | Model) {
 export class Model implements IModel {
   @Idx() public id!: string;
 
-  public tableName!: string;
+  public get tableName() {
+    return (Reflect.getMetadata("table", this.constructor)?.name ?? this.constructor.name) as string;
+  }
 
   constructor(props?: Partial<IModel>) {
     this.id = props?.id ?? "";
@@ -67,7 +70,7 @@ export class Model implements IModel {
 
   public static async migrate<SubModel extends Model>(this: { new(): SubModel }) {
     const table = getTable(this);
-    const tableName = table.name;
+    const tableName = table?.name ?? this.constructor.name;
     const queries: string[] = [];
 
     const info = (await TypedSurQL.SurrealDB.query<InfoForTable[]>(`INFO FOR TABLE ${tableName};`))[0];
@@ -209,7 +212,7 @@ export class Model implements IModel {
   }
 
   public static query<SubModel extends Model, T, Ins = Instance<Constructor<SubModel>>>(this: { new(): SubModel }, fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL) {
-    return queryModel(this, fn);
+    return magic(this, fn);
   }
 }
 
