@@ -25,11 +25,9 @@ class Friends extends RelationEdge<User, User>{ }
 class User extends Model {
   @Q.Field() name!: string
   @Q.Relation("->", Friends, "->", User) readonly friends!: User[] // so far the relational type must be readonly
-  @Q.Field({}, todo) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
+  @Q.Field({ type: todo }) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
   @Q.Record(User) bestFriend?: User
 }
-
-function test(user: User) { }
 
 export type UserObject = Q.Static<User>;
 export type Todo = Q.Static<typeof todo>;
@@ -91,11 +89,10 @@ console.log(stringFnc);
  * [ { upper_name: "MILK" } ]
  */
 
+const ting = Q.Type.Record(Q.Type.String(), Q.Type.Object({ name: Q.Type.String(), lem: Q.Type.Boolean() }));
+
 class Test extends Model {
   @Q.Field() name!: string
+  @Q.Field({ type: Q.Type.Object({ name: Q.Type.String() }) }) ttt2!: { name: string }[]
+  @Q.Field({ type: ting }) ttt!: Q.Static<typeof ting>[]
 }
-
-const testx = await magic(User, (q, f) => q`SELECT ${f("todos.completed")} FROM ${f.TABLE}`)
-  .pipe(Friends, (q, f) => q`SELECT * FROM ${f.TABLE}`)
-  .pipe(Test, (q, f) => q`SELECT "HELLO" from ${f.TABLE}`)
-  .exec();

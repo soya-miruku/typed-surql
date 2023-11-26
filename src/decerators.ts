@@ -1,5 +1,5 @@
 import "npm:reflect-metadata";
-import { Optional, TObject, Type } from "npm:@sinclair/typebox";
+import { Kind, Optional, TObject, TRecord, TSchema, Type } from "npm:@sinclair/typebox";
 import type { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {
@@ -28,7 +28,7 @@ export type IFieldParams<SubModel extends IModel> = {
 
 export interface IFieldProps<SubModel extends IModel, Types> {
   index?: { name: string, unique?: boolean, search?: boolean }
-  type?: (t: typeof Type) => Types | Types;
+  type?: ((t: typeof Type) => Types) | Types;
 }
 
 export function Table<SubModel extends IModel>(props?: ITable<SubModel, keyof SubModel>) {
@@ -37,21 +37,22 @@ export function Table<SubModel extends IModel>(props?: ITable<SubModel, keyof Su
   }
 }
 
-function parseTObject<T extends TObject>(t: T) {
-  // we go through the object properties, do [k]: {type: "string", required: true}, if the type is object we will go through it recursively
-  const properties: ObjType | { [k: string]: any } = {};
-  for (const [k, v] of Object.entries(t.properties)) {
-    if (v.type === "object") {
-      properties[k] = { type: parseTObject(v as TObject), required: v[Optional] !== "Optional", name: k, isObject: true, isArray: false };
+function parseTObject<T extends TObject | TRecord>(t: T) {
+  const properties: ObjType | Record<string, any> = {};
+  const kind = t[Kind] === "Record" ? "Record" : "Object";
+  for (const [k, v] of Object.entries(kind === "Record" ? t.patternProperties as T['properties'] : t.properties as T['properties'])) {
+    const val = v as any;
+    if (val.type === "object") {
+      properties[k] = { type: parseTObject(v as TObject), required: val[Optional] !== "Optional", name: k, isObject: true, isArray: false };
       continue;
     }
-    properties[k] = { type: v.type, required: v[Optional] !== "Optional", name: k, isObject: v.type === "object", isArray: v.type === "array" };
+    properties[k] = { type: val.type, required: val[Optional] !== "Optional", name: k, isObject: val.type === "object", isArray: val.type === "array" };
   }
 
   return properties;
 }
 
-export function Field<SubModel extends IModel, Types extends TObject>(fieldProps?: IFieldProps<SubModel, Types>, schema?: ((t: typeof Type) => Types) | Types) {
+export function Field<SubModel extends IModel, Types extends TObject | TRecord>(fieldProps?: IFieldProps<SubModel, Types>) {
   return function (target: SubModel, propertyKey: keyof SubModel) {
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
@@ -62,7 +63,7 @@ export function Field<SubModel extends IModel, Types extends TObject>(fieldProps
       name,
       isObject,
       isArray: type.name === "Array",
-      type: (isObject && schema) ? parseTObject(typeof schema === "function" ? schema(Type) : type) : type.name,
+      type: fieldProps?.type ? parseTObject(typeof fieldProps?.type === "function" ? fieldProps?.type(Type) : fieldProps.type) : type.name,
       index: fieldProps?.index,
     }
     fields.push(field);
