@@ -1,18 +1,20 @@
 import "npm:reflect-metadata";
 import { Kind, Optional, TObject, TRecord, TSchema, Type } from "npm:@sinclair/typebox";
-import type { OnlyFields, StaticModel, Constructor, IModel } from "./types.ts";
+import type { OnlyFields, StaticModel, Constructor, IModel, DotNestedKeys } from "./types.ts";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {
   name: string;
   indexes?: { columns: P[], suffix?: string, unique?: boolean, search?: boolean };
 };
+export type DirViaOptions<Via extends StaticModel> = "->" | "<-" | ".*" | `.*.${DotNestedKeys<Via extends Constructor<infer V> ? OnlyFields<V> : never>}`;
+export type DirToOptions<DirTo extends any> = DirTo extends "->" | "<-" ? StaticModel : never;
 
 export type IRelationParams<From extends IModel, Via extends StaticModel, To extends StaticModel> = {
   from: From;
   via: Via;
-  to: To;
-  dirVia: "<-" | "->";
-  dirTo: "<-" | "->";
+  to?: To;
+  dirVia: DirViaOptions<Via>;
+  select?: DirViaOptions<Via> | "->" | "<-";
 };
 
 export type ObjType = Record<string, { type: ObjType, required: boolean, name: string, isObject: boolean }>;
@@ -100,7 +102,13 @@ export function Record<ModelType extends Constructor<IModel>>(recType: ModelType
   };
 }
 
-export function Relation<SubModel extends IModel, DirVia extends "->" | "<-", DirTo extends "->" | "<-", Via extends StaticModel, To extends StaticModel>(dirVia: DirVia, via: Via, dirTo: DirTo, to: To) {
+
+export function Relation<SubModel extends IModel,
+  DirVia extends "->" | "<-",
+  DirTo extends "->" | "<-",
+  Via extends StaticModel,
+  ViaSelectors extends DirViaOptions<Via>,
+  To extends StaticModel>(dirVia: DirVia, via: Via, select?: ViaSelectors | DirTo, to?: To) {
   return function (target: SubModel, propertyKey: keyof SubModel) {
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
@@ -109,7 +117,7 @@ export function Relation<SubModel extends IModel, DirVia extends "->" | "<-", Di
       type: "Relation",
       isArray: true,
       isObject: false,
-      params: { from: target, via, to: to, dirVia, dirTo },
+      params: { from: target, via, to: to, dirVia, select },
     }
 
     fields.push(field);

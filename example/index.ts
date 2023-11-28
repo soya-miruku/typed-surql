@@ -1,6 +1,6 @@
 import "npm:reflect-metadata";
 
-import { TypedSurQL, Model, Q, RelationEdge, query } from '../mod.ts';
+import { TypedSurQL, Model, Q, RelationEdge, query, DotNestedKeys, AsBasicModel, OnlyFields } from '../mod.ts';
 import { magic } from "../src/query.ts";
 
 await TypedSurQL.Init("http://127.0.0.1:8000", {
@@ -27,6 +27,7 @@ class Friends extends RelationEdge<User, User>{
 class User extends Model {
   @Q.Field() name!: string
   @Q.Relation("->", Friends, "->", User) readonly friends!: User[] // so far the relational type must be readonly
+  @Q.Relation("->", Friends, ".*.out") readonly friendsMeta!: Friends[]
   @Q.Field({ type: todo }) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
   @Q.Record(User) bestFriend?: User
 }
@@ -34,15 +35,15 @@ class User extends Model {
 export type UserObject = Q.Static<User>;
 export type Todo = Q.Static<typeof todo>;
 
-await User.create({ id: "first", name: "henry", todos: [{ title: "test", completed: false }] });
-await User.create({ id: "second", name: "bingo", bestFriend: "user:0", todos: [{ title: "test", completed: false }, { title: "test2", completed: true }] });
+// await User.create({ id: "first", name: "henry", todos: [{ title: "test", completed: false }] });
+// await User.create({ id: "second", name: "bingo", bestFriend: "user:0", todos: [{ title: "test", completed: false }, { title: "test2", completed: true }] });
 
-const r_rel = await User.relate("first", Friends, [User, "second"], {
-  date: new Date()
-})
+// const r_rel = await User.relate("first", Friends, [User, "second"], {
+//   date: new Date()
+// })
 
-console.log(r_rel)
-const result = await User.select(["todos", "friends", "bestFriend"], { fetch: ["friends", "bestFriend"], where: query.ql`name = "henry"` });
+// console.log(r_rel)
+const result = await User.select(["todos", "friends", "bestFriend", "friendsMeta"], { fetch: ["friends", "bestFriend", "friendsMeta"], where: query.ql`name = "henry"`, logQuery: true });
 console.log(result)
 
 /** RETURNS (AS AN EXAMPLE)
@@ -60,7 +61,7 @@ console.log(result)
  */
 
 const anotherway = await User.query((q, f) => q`SELECT ${f("todos.completed")} FROM ${f.TABLE}`).exec<Omit<User, "id" | "friends">[]>();
-console.log(anotherway)
+// console.log(anotherway)
 
 /** RETURNS (AS AN EXAMPLE)
  * [
@@ -72,7 +73,7 @@ console.log(anotherway)
 
 type AliasReturn = { completed: boolean[] };
 const alias = await User.query((q, f) => q`SELECT ${f("todos.completed").as("completed")} FROM ${f.TABLE}`).exec<AliasReturn[]>();
-console.log(alias);
+// console.log(alias);
 
 /** RETURNS (AS AN EXAMPLE)
  * [
@@ -83,14 +84,14 @@ console.log(alias);
  */
 
 const aliasValue = await User.query((q, { VALUE, TABLE, field }) => q`SELECT ${VALUE} ${field("todos.completed").as("completed")} FROM ${TABLE}`).exec();
-console.log(aliasValue);
+// console.log(aliasValue);
 
 /** RETURNS (AS AN EXAMPLE)
  * [ [ false ], [ false, true ], [ false ] ]
  */
 
 const stringFnc = await User.query((q, { LIMIT, TABLE, field, string, meta }) => q`SELECT ${string.uppercase(field("name")).as("upper_name")} FROM ${TABLE} ${LIMIT(2)}`).exec();
-console.log(stringFnc);
+// console.log(stringFnc);
 
 /** RETURNS (AS AN EXAMPLE)
  * [ { upper_name: "MILK" } ]

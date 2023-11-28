@@ -143,10 +143,11 @@ export type DotPrefix<T extends string, Prefix extends string = "."> = T extends
 
 export type DotNestedKeys<T> = T extends IModel ? "" :
   (T extends object
-    ? { [K in Exclude<keyof T, symbol>]:
-  T[K] extends Array<infer R> ? `${K}` | `${K}${DotPrefix<DotNestedKeys<R>>}`
-      : T[K] extends object ? `${K}` | `${K}${DotPrefix<DotNestedKeys<T[K]>>}`
-      : `${K}${DotPrefix<DotNestedKeys<T[K]>>}`
+  ? { [K in Exclude<keyof T, symbol>]
+    : T[K] extends Array<infer R> ? `${K}` | `${K}${DotPrefix<DotNestedKeys<R>>}`
+    : T[K] extends Date ? `${K}`
+    : T[K] extends object ? `${K}` | `${K}${DotPrefix<DotNestedKeys<T[K]>>}`
+    : `${K}${DotPrefix<DotNestedKeys<T[K]>>}`
     }[Exclude<keyof T, symbol>]
     : ""
   ) extends infer D ? Extract<D, string> : never;

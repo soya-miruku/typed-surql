@@ -88,7 +88,13 @@ export async function raw<T>(strings: TemplateStringsArray, ...value: unknown[])
 export function magic<M extends Constructor<Model>, T, Ins = Instance<M>>(m: M, fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL, currentSql = "") {
   const baseFn = (k: DotNestedKeys<Ins> | Ins | Ins[]) => {
     const f = getField(m, k as keyof Model);
-    if (f && f.type === "Relation" && f.params) return val(`${f.params.dirVia}${f.params.via.name}${f.params.dirTo}${f.params.to.name} as ${f.name}`);
+    if (f && f.type === "Relation" && f.params) {
+      const viaTableName = getTableName(f.params.via as Constructor<Model>);
+      const toTableName = f.params?.to ? getTableName(f.params.to as Constructor<Model>) : undefined;
+      const toPath = toTableName ? `${f.params.select}${toTableName}` : f.params.select ? `${f.params.select}` : "";
+      const viaPath = `${f.params.dirVia}${viaTableName}`;
+      return val(`${viaPath}${toPath} as ${f.name as string}`);
+    }
     if (typeof k === "string") return val(k as string);
     return val(JSON.stringify(k));
   }

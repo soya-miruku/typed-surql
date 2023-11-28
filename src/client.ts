@@ -127,12 +127,13 @@ export class Model implements IModel {
       const [name, id] = specifier ? specifier : [field.name, undefined];
       if (field.type === "Relation" && field.params) {
         const viaTableName = getTableName(field.params.via as Constructor<Model>);
-        const toTableName = getTableName(field.params.to as Constructor<Model>);
-        return `${field.params.dirVia}${viaTableName}${id ? `:${id}` : ""}${field.params.dirTo}${toTableName} as ${name as string}`;
+        const toTableName = field.params?.to ? getTableName(field.params.to as Constructor<Model>) : undefined;
+        const toPath = toTableName ? `${field.params.select}${toTableName}` : field.params.select ? `${field.params.select}` : "";
+        const viaPath = `${field.params.dirVia}${viaTableName}${id ? `:${id}` : ""}`;
+        return `${viaPath}${toPath} as ${name as string}`;
       }
       return `${field.name as string}`;
     });
-
 
     const from = options?.id ? options?.id.includes(":") ? `${tableName}:${options?.id.split(":")[1]}` : `${tableName}:${options?.id}` : tableName;
     const query = `SELECT${options?.value ? " VALUE" : ""} ${selections.join(", ")} FROM ${from}${options?.where ? ` WHERE ${options?.where.toString()}` : ""}${options?.fetch && options?.fetch.length > 0 ? ` FETCH ${options?.fetch.join(", ")}` : ""}`;
