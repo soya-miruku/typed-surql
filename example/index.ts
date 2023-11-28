@@ -19,7 +19,9 @@ const todo = Q.Type.Object({
 });
 
 @Q.Table({ name: "friends" })
-class Friends extends RelationEdge<User, User>{ }
+class Friends extends RelationEdge<User, User>{
+  @Q.Field() date!: Date
+}
 
 @Q.Table({ name: "user" })
 class User extends Model {
@@ -32,9 +34,14 @@ class User extends Model {
 export type UserObject = Q.Static<User>;
 export type Todo = Q.Static<typeof todo>;
 
-await User.create({ name: "henry", todos: [{ title: "test", completed: false }] });
-await User.create({ name: "bingo", bestFriend: "user:0", todos: [{ title: "test", completed: false }, { title: "test2", completed: true }] });
+await User.create({ id: "first", name: "henry", todos: [{ title: "test", completed: false }] });
+await User.create({ id: "second", name: "bingo", bestFriend: "user:0", todos: [{ title: "test", completed: false }, { title: "test2", completed: true }] });
 
+const r_rel = await User.relate("first", Friends, [User, "second"], {
+  date: new Date()
+})
+
+console.log(r_rel)
 const result = await User.select(["todos", "friends", "bestFriend"], { fetch: ["friends", "bestFriend"], where: query.ql`name = "henry"` });
 console.log(result)
 

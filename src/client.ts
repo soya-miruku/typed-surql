@@ -201,14 +201,16 @@ export class Model implements IModel {
     return await TypedSurQL.SurrealDB.delete<AsBasicModel<SubModel>>(thing);
   }
 
-  public static async relate<SubModel extends Model, Via extends Constructor<Model>, To extends Constructor<Model>>(this: { new(props?: Partial<Model>): SubModel }, id: string, via: [Via, string] | Via, to: [To, string]): Promise<ActionResult<AsBasicModel<SubModel>>[]> {
+  public static async relate<SubModel extends Model,
+    Via extends Constructor<RelationEdge<SubModel, To extends Constructor<infer X> ? X : never>>,
+    To extends Constructor<Model>>(this: { new(props?: Partial<Model>): SubModel }, id: string, via: [Via, string] | Via, to: [To, string], content?: Partial<Omit<InstanceType<Via>, "in" | "out">>): Promise<ActionResult<AsBasicModel<SubModel>>[]> {
     const viaCtor = Array.isArray(via) ? via[0] : via;
     const toCtor = Array.isArray(to) ? to[0] : to;
     const viaTableName = getTableName(viaCtor)
     const toTableName = getTableName(toCtor)
 
     const viaName = Array.isArray(via) ? `${viaTableName}:${via[1]}` : viaTableName;
-    return await TypedSurQL.SurrealDB.query(`RELATE ${`${getTableName(this)}:${id}`}->${viaName}->${`${toTableName}:${to[1]}`};`);
+    return await TypedSurQL.SurrealDB.query(`RELATE ${`${getTableName(this)}:${id}`}->${viaName}->${`${toTableName}:${to[1]}`}${content ? ` CONTENT ${JSON.stringify(content, floatJSONReplacer, 2)}` : ""};`);
   }
 
   public static query<SubModel extends Model, T, Ins = Instance<Constructor<SubModel>>>(this: { new(): SubModel }, fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL) {
