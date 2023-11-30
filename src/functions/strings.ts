@@ -1,6 +1,5 @@
-import { parseType, qlFn } from "./index.ts"
+import { parseType, qlFn, Input } from "./index.ts"
 
-type Input = string | qlFn
 export function concat(...args: Input[]) {
   return qlFn.create(`string::concat(${args.map(s => `"${s}"`).join(",")})`)
 }

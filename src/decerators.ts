@@ -1,11 +1,12 @@
 import "npm:reflect-metadata";
-import { Kind, Optional, TObject, TRecord, TSchema, Type } from "npm:@sinclair/typebox";
+import { Kind, Optional, TObject, TRecord, Type } from "https://esm.sh/@sinclair/typebox@0.31.28";
 import type { OnlyFields, StaticModel, Constructor, IModel, DotNestedKeys } from "./types.ts";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {
   name: string;
   indexes?: { columns: P[], suffix?: string, unique?: boolean, search?: boolean };
 };
+
 export type DirViaOptions<Via extends StaticModel> = "->" | "<-" | ".*" | `.*.${DotNestedKeys<Via extends Constructor<infer V> ? OnlyFields<V> : never>}`;
 export type DirToOptions<DirTo extends any> = DirTo extends "->" | "<-" ? StaticModel : never;
 

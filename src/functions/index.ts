@@ -26,3 +26,5 @@ export function parseType(value: any) {
     return JSON.stringify(value);
   }
 }
+
+export type Input = string | qlFn

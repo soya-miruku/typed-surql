@@ -99,7 +99,7 @@ export type StatusHooks = {
     onError?: () => unknown;
 };
 
-type UseOptions = {
+export type UseOptions = {
 	namespace: string;
 	database: string;
 }
@@ -108,7 +108,7 @@ export type ActionResult<T extends Record<string, unknown>, U extends Record<str
 	id: string;
 };
 
-type SuperUserAuth = {
+export type SuperUserAuth = {
 	username: string;
 	password: string;
 	namespace?: undefined;
@@ -116,21 +116,21 @@ type SuperUserAuth = {
 	scope?: undefined;
 }
 
-type NamespaceAuth = {
+export type NamespaceAuth = {
 	namespace: string;
 	username: string;
 	password: string;
 	database?: undefined;
 	scope?: undefined;
 }
-type DatabaseAuth = {
+export type DatabaseAuth = {
 	namespace: string;
 	database: string;
 	username: string;
 	password: string;
 	scope?: undefined;
 }
-type ScopeAuth = {
+export type ScopeAuth = {
 	scope: string;
 	namespace?: string | undefined;
 	database?: string | undefined;
@@ -138,7 +138,7 @@ type ScopeAuth = {
 	[k: string]: unknown;
 }
 
-type AnyAuth = {
+export type AnyAuth = {
 	username: string;
 	password: string;
 	namespace?: undefined;

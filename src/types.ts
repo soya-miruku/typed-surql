@@ -158,6 +158,11 @@ export interface IModel {
   tableName: string;
 }
 
+export abstract class ModelBase implements IModel {
+  public id!: string;
+  public tableName!: string;
+}
+
 export type RecordLink<Name extends string> = `${Name}:${string}`
 
 export type StaticModel = Constructor<IModel>;

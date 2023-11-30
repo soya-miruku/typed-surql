@@ -1,4 +1,4 @@
-import { qlFn, parseType } from "./index.ts";
+import { qlFn, parseType, Input } from "./index.ts";
 
 export function md5(value: any) {
   return qlFn.create(`crypto::md5(${parseType(value)})`)
@@ -16,7 +16,7 @@ export function sha512(value: any) {
   return qlFn.create(`crypto::sha512(${parseType(value)})`)
 }
 
-export function argon2Compare(input: string, val: any) {
+export function argon2Compare(input: Input, val: any) {
   return qlFn.create(`crypto::argon2::compare("${input}", ${parseType(val)})`)
 }
 
