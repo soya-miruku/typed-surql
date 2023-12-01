@@ -5,7 +5,7 @@ import { FnBody, Instance, SQL, funcs } from "./utils/query.ts";
 import { TokenAuthType, defaultTokenAuthProps } from "./token.ts";
 import { IModel } from "./types/types.ts";
 import { qlFn } from "./functions/index.ts";
-import TypedSurQL from "./instance.ts";
+import TypedSurQL from "./client.ts";
 
 export type TSurrealPermissionOperation = 'CREATE' | 'UPDATE' | 'DELETE' | 'SELECT';
 export type TPermissionMultiple = [TSurrealPermissionOperation | TSurrealPermissionOperation[], | "NONE" | "FULL" | SQL];

@@ -1,6 +1,6 @@
 import "npm:reflect-metadata";
-import { Model, Q, RelationEdge, query } from '../mod.ts';
-import TypedSurQL from '../src/instance.ts';
+import { Q } from '../mod.ts';
+import TypedSurQL from '../src/client.ts';
 import { Permissions } from "../src/permissions.ts";
 
 await TypedSurQL.init("http://127.0.0.1:8000", {
@@ -21,12 +21,12 @@ const todo = Q.Type.Object({
 });
 
 @Q.Table({ name: "friends" })
-class Friends extends RelationEdge<User, User>{
+class Friends extends Q.RelationEdge<User, User>{
   @Q.Field() date!: Date
 }
 
 @Q.Table({ name: "user" })
-class User extends Model {
+class User extends Q.Model {
   @Q.Field() name!: string
   @Q.Relation("->", Friends, "->", User) readonly friends!: User[] // so far the relational type must be readonly
   @Q.Relation("->", Friends, ".*.out") readonly friendsMeta!: Friends[]
@@ -107,7 +107,7 @@ const r_rel = await User.relate(henry.at(0)!.id, Friends, [User, bingo.at(0)!.id
  */
 
 console.log(await User.query((q, f) => q`SELECT * FROM $token`).exec())
-const result = await User.select(["todos", "friends", "bestFriend", "friendsMeta"], { fetch: ["friends", "bestFriend", "friendsMeta"], where: query.ql`name = "henry"`, logQuery: true });
+const result = await User.select(["todos", "friends", "bestFriend", "friendsMeta"], { fetch: ["friends", "bestFriend", "friendsMeta"], where: Q.ql`name = "henry"`, logQuery: true });
 console.log(result)
 
 /** RETURNS (AS AN EXAMPLE)

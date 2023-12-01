@@ -30,8 +30,8 @@ await build({
 				"import": "./src/index.ts",
 				"require": "./src/index.js"
 			},
-			"./client": "./src/instance.ts",
-			"./query": "./src/utils/query.ts",
+			"./client": "./src/client.ts",
+			"./types": "./src/types/index.ts",
 			"./functions": "./src/functions/index.ts"
 		},
 		dependencies: {

@@ -5,7 +5,7 @@ import { ql, SQL, Instance, FnBody, funcs } from "./utils/query.ts";
 import { ActionResult, AnyAuth, LiveQueryResponse, Patch, Token } from "./types/surreal-types.ts";
 import { floatJSONReplacer } from "./utils/parsers.ts";
 import { Idx } from "./decerators.ts";
-import TypedSurQL from "./instance.ts";
+import TypedSurQL from "./client.ts";
 
 export type InfoForTable = {
   events: Record<string, string>;
