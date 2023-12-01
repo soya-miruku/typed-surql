@@ -29,7 +29,10 @@ await build({
 			".": {
 				"import": "./src/index.ts",
 				"require": "./src/index.js"
-			}
+			},
+			"./client": "./src/instance.ts",
+			"./query": "./src/utils/query.ts",
+			"./functions": "./src/functions/index.ts"
 		},
 		dependencies: {
 			"@sinclair/typebox": "^0.31.28",

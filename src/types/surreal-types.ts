@@ -100,74 +100,74 @@ export type StatusHooks = {
 };
 
 export type UseOptions = {
-	namespace: string;
-	database: string;
+    namespace: string;
+    database: string;
 }
 
 export type ActionResult<T extends Record<string, unknown>, U extends Record<string, unknown> = T> = T & U & {
-	id: string;
+    id: string;
 };
 
 export type SuperUserAuth = {
-	username: string;
-	password: string;
-	namespace?: undefined;
-	database?: undefined;
-	scope?: undefined;
+    username: string;
+    password: string;
+    namespace?: undefined;
+    database?: undefined;
+    scope?: undefined;
 }
 
 export type NamespaceAuth = {
-	namespace: string;
-	username: string;
-	password: string;
-	database?: undefined;
-	scope?: undefined;
+    namespace: string;
+    username: string;
+    password: string;
+    database?: undefined;
+    scope?: undefined;
 }
 export type DatabaseAuth = {
-	namespace: string;
-	database: string;
-	username: string;
-	password: string;
-	scope?: undefined;
+    namespace: string;
+    database: string;
+    username: string;
+    password: string;
+    scope?: undefined;
 }
 export type ScopeAuth = {
-	scope: string;
-	namespace?: string | undefined;
-	database?: string | undefined;
+    scope: string;
+    namespace?: string | undefined;
+    database?: string | undefined;
 } & {
-	[k: string]: unknown;
+    [k: string]: unknown;
 }
 
 export type AnyAuth = {
-	username: string;
-	password: string;
-	namespace?: undefined;
-	database?: undefined;
-	scope?: undefined;
+    username: string;
+    password: string;
+    namespace?: undefined;
+    database?: undefined;
+    scope?: undefined;
 } | {
-	namespace: string;
-	username: string;
-	password: string;
-	database?: undefined;
-	scope?: undefined;
+    namespace: string;
+    username: string;
+    password: string;
+    database?: undefined;
+    scope?: undefined;
 } | {
-	namespace: string;
-	database: string;
-	username: string;
-	password: string;
-	scope?: undefined;
+    namespace: string;
+    database: string;
+    username: string;
+    password: string;
+    scope?: undefined;
 }
 export type Token = string;
 
 export type HTTPAuthenticationResponse = {
-	code: 200;
-	details: string;
-	token: string;
+    code: 200;
+    details: string;
+    token: string;
 } | {
-	code: 403;
-	details: string;
-	description: string;
-	information: string;
+    code: 403;
+    details: string;
+    description: string;
+    information: string;
 }
 
 export interface Connection {
@@ -209,7 +209,7 @@ export type ConnectionOptions = {
 });
 
 export declare class PreparedQuery {
-	readonly query: string;
-	readonly bindings: Record<string, unknown>;
-	constructor(query: string, bindings?: Record<string, unknown>);
+    readonly query: string;
+    readonly bindings: Record<string, unknown>;
+    constructor(query: string, bindings?: Record<string, unknown>);
 }

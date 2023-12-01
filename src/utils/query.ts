@@ -1,6 +1,6 @@
 import type { Constructor, Simplify } from "npm:type-fest";
 import { qlFn } from "../functions/index.ts";
-import { DotNestedKeys, IModel, OnlyFields } from "../types.ts";
+import { DotNestedKeys, IModel, OnlyFields } from "../types/types.ts";
 import { alias, arrays, count, cryptos, durations, http, math, meta, operations, parse, rands, search, session, strings, time } from "../functions/mod.ts";
 export type StringContains<T extends string, U extends string> = T extends `${string}${U}${string}` ? true : false;
 export type SQLInput<T extends string> = StringContains<T, "'"> extends true ? "USE VARS, INSTEAD OF '" : T;

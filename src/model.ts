@@ -1,8 +1,8 @@
 import type { Constructor } from "npm:type-fest";
 import { Surreal } from "https://deno.land/x/surrealdb/mod.ts";
-import type { AsBasicModel, CreateInput, IModel, LengthGreaterThanOne, ModelKeysDot, OnlyFields, TransformSelected, UnionToArray } from "./types.ts";
+import type { AsBasicModel, CreateInput, IModel, LengthGreaterThanOne, ModelKeysDot, OnlyFields, TransformSelected, UnionToArray } from "./types/types.ts";
 import { ql, SQL, Instance, FnBody, funcs } from "./utils/query.ts";
-import { ActionResult, AnyAuth, LiveQueryResponse, Patch, Token } from "./surreal-types.ts";
+import { ActionResult, AnyAuth, LiveQueryResponse, Patch, Token } from "./types/surreal-types.ts";
 import { floatJSONReplacer } from "./utils/parsers.ts";
 import { Idx } from "./decerators.ts";
 import TypedSurQL from "./instance.ts";

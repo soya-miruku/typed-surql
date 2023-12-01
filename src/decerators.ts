@@ -1,6 +1,6 @@
 import "npm:reflect-metadata";
 import { Kind, Optional, TObject, TRecord, Type } from "https://esm.sh/@sinclair/typebox@0.31.28";
-import type { OnlyFields, StaticModel, Constructor, IModel, DotNestedKeys } from "./types.ts";
+import type { OnlyFields, StaticModel, Constructor, IModel, DotNestedKeys } from "./types/types.ts";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {
   name: string;

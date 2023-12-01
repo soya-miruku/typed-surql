@@ -3,9 +3,9 @@ import { Value } from "https://esm.sh/@sinclair/typebox@0.31.28/value";
 import { Type, Static, TProperties } from 'https://esm.sh/@sinclair/typebox@0.31.28'
 import { FnBody, Instance, SQL, funcs } from "./utils/query.ts";
 import { TokenAuthType, defaultTokenAuthProps } from "./token.ts";
-import { IModel } from "./types.ts";
+import { IModel } from "./types/types.ts";
 import { qlFn } from "./functions/index.ts";
-import TypedSurQL from "./index.ts";
+import TypedSurQL from "./instance.ts";
 
 export type TSurrealPermissionOperation = 'CREATE' | 'UPDATE' | 'DELETE' | 'SELECT';
 export type TPermissionMultiple = [TSurrealPermissionOperation | TSurrealPermissionOperation[], | "NONE" | "FULL" | SQL];

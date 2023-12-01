@@ -1,6 +1,6 @@
 import type { Constructor } from 'npm:type-fest';
 import { qlFn } from './index.ts'
-import { IModel } from '../types.ts';
+import { IModel } from '../types/types.ts';
 
 export function id(record: `${string}:${string}`) {
   return qlFn.create(`meta::id(${record})`)

@@ -2,10 +2,10 @@ import { ExperimentalSurrealHTTP, Surreal } from "https://deno.land/x/surrealdb/
 import { AsyncReturnType, Class } from "npm:type-fest";
 import { Static, TObject, TProperties } from "https://esm.sh/@sinclair/typebox@0.31.28";
 import { Value } from "https://esm.sh/@sinclair/typebox@0.31.28/value";
-import { IModel, ModelBase, Constructor, DotNestedKeys } from "./types.ts";
+import { IModel, ModelBase, Constructor, DotNestedKeys } from "./types/types.ts";
 import { ITable } from "./decerators.ts";
 import { IFieldParams } from "./decerators.ts";
-import { AnyAuth, ConnectionOptions, RawQueryResult, Token } from "./surreal-types.ts";
+import { AnyAuth, ConnectionOptions, RawQueryResult, Token } from "./types/surreal-types.ts";
 import { FnBody, Instance, SQL, funcs, ql } from "./utils/query.ts";
 import { operations } from "./functions/operations.ts";
 import { ISurrealScope } from "./scope.ts";
