@@ -49,6 +49,10 @@ export class ModelInstance<SubModel extends Model> {
     return (await this.surql.client.query<InfoForTable[]>(`INFO FOR TABLE ${this.surql.getTableName(this.ctor)};`))[0];
   }
 
+  public async kill(uuid: string) {
+    return await this.surql.client.kill(uuid);
+  }
+
   public async live(callback?: (data: LiveQueryResponse<OnlyFields<SubModel>>) => unknown, diff?: boolean): Promise<string> {
     if (this.surql.STRATEGY === "HTTP") throw new Error("Live queries are not supported in HTTP mode");
     return await (this.surql.client as Surreal).live<Record<string, OnlyFields<SubModel>>>(this.surql.getTableName(this.ctor), callback as any, diff);
@@ -203,6 +207,10 @@ export class Model implements IModel {
 
   public static async live<SubModel extends Model>(this: { new(): SubModel }, callback?: (data: LiveQueryResponse<OnlyFields<SubModel>>) => unknown, diff?: boolean): Promise<string> {
     return await new ModelInstance(this).live(callback, diff);
+  }
+
+  public static async kill<SubModel extends Model>(this: { new(): SubModel }, uuid: string) {
+    return await new ModelInstance(this).kill(uuid);
   }
 
   public static async select<SubModel extends Model, Key extends keyof OnlyFields<SubModel>, Fetch extends ModelKeysDot<Pick<SubModel, Key> & Model> = never, WithValue extends boolean | undefined = undefined>(
