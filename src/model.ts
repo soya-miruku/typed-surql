@@ -122,16 +122,12 @@ export class ModelInstance<SubModel extends Model> {
     if (!transformedData) {
       throw new Error("transformedData is undefined");
     }
-    if (this.surql.STRATEGY === "HTTP") {
-      if (Array.isArray(transformedData)) {
-        if (!transformedData.length) return [];
-        return (await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`))?.at(-1) as ActionResult<OnlyFields<SubModel>, U>[];
-      } else {
-        return (await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`))?.at(-1) as ActionResult<OnlyFields<SubModel>, U>[];
-      }
+    if (Array.isArray(transformedData)) {
+      if (!transformedData.length) return [];
+      return (await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`))?.at(-1) as ActionResult<OnlyFields<SubModel>, U>[];
+    } else {
+      return (await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`))?.at(-1) as ActionResult<OnlyFields<SubModel>, U>[];
     }
-
-    return await (this.surql.client as Surreal).insert<OnlyFields<SubModel>, U>(this.surql.getTableName(this.ctor), transformedData);
   }
 
   public async update<U extends AsBasicModel<SubModel>>(data?: U | undefined): Promise<ActionResult<AsBasicModel<SubModel>, U>[]> {
