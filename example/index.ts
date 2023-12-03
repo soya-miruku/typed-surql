@@ -28,10 +28,10 @@ class Friends extends Q.RelationEdge<User, User>{
 @Q.Table({ name: "user" })
 class User extends Q.Model {
   @Q.Field() name!: string
-  @Q.Relation("->", Friends, "->", User) readonly friends!: User[] // so far the relational type must be readonly
-  @Q.Relation("->", Friends, ".*.out") readonly friendsMeta!: Friends[]
+  @Q.Relation("->", Friends, "->", User) readonly friends!: Q.RecordOf<User>[] // so far the relational type must be readonly
+  @Q.Relation("->", Friends, ".*.out") readonly friendsMeta!: Q.RecordOf<Friends>[]
   @Q.Field({ type: todo }) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
-  @Q.Record(User) bestFriend?: User
+  @Q.Record(User) bestFriend?: Q.RecordOf<User>
   @Q.Field() password!: string
   @Q.Field() email!: string
 }

@@ -3,7 +3,7 @@ import { Surreal } from "https://deno.land/x/surrealdb/mod.ts";
 import type { AsBasicModel, CreateInput, IModel, LengthGreaterThanOne, ModelKeysDot, OnlyFields, TransformSelected, UnionToArray } from "./types/types.ts";
 import { ql, SQL, Instance, FnBody, funcs } from "./utils/query.ts";
 import { ActionResult, AnyAuth, LiveQueryResponse, Patch, Token } from "./types/surreal-types.ts";
-import { floatJSONReplacer } from "./utils/parsers.ts";
+import { extractToId, floatJSONReplacer } from "./utils/parsers.ts";
 import { Idx } from "./decerators.ts";
 import TypedSurQL from "./client.ts";
 
@@ -97,7 +97,7 @@ export class ModelInstance<SubModel extends Model> {
     for (const [key, value] of Object.entries(props))
       transformedProps[key] = this.surql.transform(key, value as object | Model);
 
-    return await this.surql.client.query(`CREATE ${this.surql.getTableName(this.ctor)} CONTENT ${JSON.stringify(transformedProps, floatJSONReplacer, 2)}`, { value: transformedProps }) as ActionResult<OnlyFields<SubModel>, CreateInput<SubModel>>[];
+    return (await this.surql.client.query(`CREATE ${this.surql.getTableName(this.ctor)} CONTENT ${JSON.stringify(transformedProps, floatJSONReplacer, 2)}`, { value: transformedProps }))?.at(-1) as ActionResult<OnlyFields<SubModel>, CreateInput<SubModel>>[];
   }
 
   public async insert<U extends Partial<CreateInput<SubModel>>>(data: U | U[] | undefined): Promise<ActionResult<OnlyFields<SubModel>, U>[]> {
@@ -125,9 +125,9 @@ export class ModelInstance<SubModel extends Model> {
     if (this.surql.STRATEGY === "HTTP") {
       if (Array.isArray(transformedData)) {
         if (!transformedData.length) return [];
-        return await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`)
+        return (await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`))?.at(-1) as ActionResult<OnlyFields<SubModel>, U>[];
       } else {
-        return await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`)
+        return (await this.surql.client.query(`INSERT INTO ${this.surql.getTableName(this.ctor)} ${JSON.stringify(transformedData, floatJSONReplacer, 2)}`))?.at(-1) as ActionResult<OnlyFields<SubModel>, U>[];
       }
     }
 
@@ -159,7 +159,8 @@ export class ModelInstance<SubModel extends Model> {
     const toTableName = this.surql.getTableName(toCtor)
 
     const viaName = Array.isArray(via) ? `${viaTableName}:${via[1]}` : viaTableName;
-    return await this.surql.client.query(`RELATE ${`${this.surql.getTableName(this.ctor)}:${id}`}->${viaName}->${`${toTableName}:${to[1]}`}${content ? ` CONTENT ${JSON.stringify(content, floatJSONReplacer, 2)}` : ""};`);
+    const from = id.includes(":") ? id : `${this.surql.getTableName(this.ctor)}:${id}`;
+    return await this.surql.client.query(`RELATE ${from}->${viaName}->${`${toTableName}:${extractToId(to[1])}`}${content ? ` CONTENT ${JSON.stringify(content, floatJSONReplacer, 2)}` : ""};`);
   }
 
   public query<T, Ins = Instance<Constructor<SubModel>>>(fn: (q: typeof ql<T>, field: FnBody<Ins>) => SQL) {
@@ -172,6 +173,14 @@ export class Model implements IModel {
 
   public get tableName() {
     return (Reflect.getMetadata("table", this.constructor)?.name ?? this.constructor.name) as string;
+  }
+
+  public toString() {
+    return `${this.tableName}:${this.id}`;
+  }
+
+  public static toString() {
+    return TypedSurQL.getTableName(this);
   }
 
   constructor(props?: Partial<IModel>) {

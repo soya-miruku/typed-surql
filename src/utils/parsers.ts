@@ -8,3 +8,9 @@ export function floatJSONReplacer(key: string, value: any): any {
   }
   return value;
 }
+
+
+export function extractToId(str: string) {
+  const match = /:(\w+)$/.exec(str);
+  return match ? match[1] : str;
+}
