@@ -15,10 +15,10 @@ await TypedSurQL.init("http://127.0.0.1:8000", {
 
 const SECRET = "eyJhbGciOiJIUzUxMiJ9.uMQdGd-";
 
-class Todo {
-  title!: string
-  completed!: boolean
-}
+const Todo = Q.Type.Object({
+  title: Q.Type.String(),
+  completed: Q.Type.Boolean(),
+});
 
 class TestObj {
   age: number = 0;

@@ -1,6 +1,7 @@
 import "npm:reflect-metadata";
 import { Kind, Optional, TObject, TProperties, TRecord, Type } from "https://esm.sh/@sinclair/typebox@0.31.28";
 import type { OnlyFields, StaticModel, Constructor, IModel, DotNestedKeys } from "./types/types.ts";
+import type { Class } from "npm:type-fest";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {
   name: string;
@@ -54,9 +55,11 @@ function parseTObject<T extends TObject | TRecord>(t: T) {
   return properties;
 }
 
+export type TypeValue = Class<unknown> | Function | object | symbol;
 export type RecursiveArray<TValue> = Array<RecursiveArray<TValue> | TValue>;
 export type ReturnTypeFuncValue = TypeValue | RecursiveArray<TypeValue> | TObject | TProperties;
 export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
+
 export interface TypeDecoratorParams<T> {
   options: Partial<T>;
   returnTypeFunc?: ReturnTypeFunc;
@@ -77,13 +80,15 @@ export function getTypeDecoratorParams<T extends object>(returnTypeFuncOrOptions
 export function Prop<SubModel extends IModel>(_type?: ReturnTypeFunc, fieldProps?: IFieldProps<SubModel>) {
   return function (target: SubModel, propertyKey: keyof SubModel) {
     if (typeof propertyKey === "symbol") {
-      throw new SymbolKeysNotSupportedError();
+      throw new Error("Symbol properties are not supported");
     }
 
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
-
     let type = _type ? _type() : Reflect.getMetadata("design:type", target, propertyKey.toString());
+    if (!(typeof type == "function" && type.prototype !== undefined)) {
+      type = parseTObject(type);
+    }
     type = type ?? { name: "unknown" }
     const isObject = type.name === "Object";
     const field = {
@@ -91,7 +96,6 @@ export function Prop<SubModel extends IModel>(_type?: ReturnTypeFunc, fieldProps
       isObject,
       isArray: Array.isArray(type) || type.name === "Array",
       type,
-      // type: fieldProps?.type ? parseTObject(typeof fieldProps?.type === "function" ? fieldProps?.type(Type) : fieldProps.type) : type.name,
       index: fieldProps?.index,
     }
     fields.push(field);
