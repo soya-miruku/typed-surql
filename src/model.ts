@@ -159,7 +159,7 @@ export class ModelInstance<SubModel extends Model> {
     const toTableName = this.surql.getTableName(toCtor)
 
     const viaName = Array.isArray(via) ? `${viaTableName}:${via[1]}` : viaTableName;
-    const from = id.includes(":") ? id : `${this.surql.getTableName(this.ctor)}:${id}`;
+    const from = `${this.surql.getTableName(this.ctor)}:${extractToId(id)}`;
     return await this.surql.client.query(`RELATE ${from}->${viaName}->${`${toTableName}:${extractToId(to[1])}`}${content ? ` CONTENT ${JSON.stringify(content, floatJSONReplacer, 2)}` : ""};`);
   }
 
