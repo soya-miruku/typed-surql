@@ -77,6 +77,15 @@ export function getTypeDecoratorParams<T extends object>(returnTypeFuncOrOptions
   };
 }
 
+function getType(returnTypeFunc: ReturnTypeFunc): TypeValue {
+  const typeval = returnTypeFunc();
+  let typeItem = Array.isArray(typeval) ? typeval[0] : typeval;
+  if (!(typeof typeItem == "function" && typeItem.prototype !== undefined && typeItem.prototype.constructor !== undefined)) {
+    typeItem = parseTObject(typeItem);
+  }
+  return typeItem;
+}
+
 export function Prop<SubModel extends IModel>(_type?: ReturnTypeFunc, fieldProps?: IFieldProps<SubModel>) {
   return function (target: SubModel, propertyKey: keyof SubModel) {
     if (typeof propertyKey === "symbol") {
@@ -85,12 +94,10 @@ export function Prop<SubModel extends IModel>(_type?: ReturnTypeFunc, fieldProps
 
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
-    let type = _type ? _type() : Reflect.getMetadata("design:type", target, propertyKey.toString());
-    if (!(typeof type == "function" && type.prototype !== undefined && type.prototype.constructor !== undefined)) {
-      console.log(type, "type")
-      type = parseTObject(Array.isArray(type) ? type[0] : type);
-    }
+
+    let type = _type ? getType(_type) : Reflect.getMetadata("design:type", target, propertyKey.toString());
     type = type ?? { name: "unknown" }
+
     const isObject = type.name === "Object";
     const field = {
       name,
