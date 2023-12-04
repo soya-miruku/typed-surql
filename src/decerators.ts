@@ -55,7 +55,7 @@ function parseTObject<T extends TObject | TRecord>(t: T) {
   return properties;
 }
 
-export function Field<SubModel extends IModel, Types extends TObject | TRecord>(fieldProps?: IFieldProps<SubModel, Types>) {
+export function Prop<SubModel extends IModel, Types extends TObject | TRecord>(fieldProps?: IFieldProps<SubModel, Types>) {
   return function (target: SubModel, propertyKey: keyof SubModel) {
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
