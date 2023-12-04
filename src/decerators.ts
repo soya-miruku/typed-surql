@@ -86,8 +86,9 @@ export function Prop<SubModel extends IModel>(_type?: ReturnTypeFunc, fieldProps
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
     let type = _type ? _type() : Reflect.getMetadata("design:type", target, propertyKey.toString());
-    if (!(typeof type == "function" && type.prototype !== undefined)) {
-      type = parseTObject(type);
+    if (!(typeof type == "function" && type.prototype !== undefined && type.prototype.constructor !== undefined)) {
+      console.log(type, "type")
+      type = parseTObject(Array.isArray(type) ? type[0] : type);
     }
     type = type ?? { name: "unknown" }
     const isObject = type.name === "Object";
