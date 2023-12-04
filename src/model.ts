@@ -7,6 +7,19 @@ import { extractToId, floatJSONReplacer } from "./utils/parsers.ts";
 import { Idx } from "./decerators.ts";
 import TypedSurQL from "./client.ts";
 
+export type SubscribeResponse<T> = {
+  [Symbol.asyncIterator](): {
+    next(): Promise<{
+      value: T;
+      done: boolean;
+    }>;
+    return(id: string): Promise<{
+      value: undefined;
+      done: boolean;
+    }>;
+  }
+}
+
 export type InfoForTable = {
   events: Record<string, string>;
   fields: Record<string, string>;
@@ -56,6 +69,31 @@ export class ModelInstance<SubModel extends Model> {
   public async live(callback?: (data: LiveQueryResponse<OnlyFields<SubModel>>) => unknown, diff?: boolean): Promise<string> {
     if (this.surql.STRATEGY === "HTTP") throw new Error("Live queries are not supported in HTTP mode");
     return await (this.surql.client as Surreal).live<Record<string, OnlyFields<SubModel>>>(this.surql.getTableName(this.ctor), callback as any, diff);
+  }
+
+  public subscribe(diff?: boolean) {
+    if (this.surql.STRATEGY === "HTTP") throw new Error("Live queries are not supported in HTTP mode");
+    const live = this.live.bind(this);
+    const kill = this.kill.bind(this);
+    return {
+      [Symbol.asyncIterator]() {
+        let output: LiveQueryResponse<OnlyFields<SubModel>> | null = null;
+        let killId: string | null = null;
+
+        live((data) => { output = data ?? null; }, diff).then(id => { killId = id; });
+        return {
+          async next() {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            return Promise.resolve({ value: output, done: false });
+          },
+          return(id: string) {
+            console.log("Killing", id);
+            kill(killId!);
+            return Promise.resolve({ value: undefined, done: true });
+          }
+        }
+      }
+    }
   }
 
   public async select<Key extends keyof OnlyFields<SubModel>, Fetch extends ModelKeysDot<Pick<SubModel, Key> & Model> = never, WithValue extends boolean | undefined = undefined>(
@@ -207,6 +245,10 @@ export class Model implements IModel {
 
   public static async live<SubModel extends Model>(this: { new(): SubModel }, callback?: (data: LiveQueryResponse<OnlyFields<SubModel>>) => unknown, diff?: boolean): Promise<string> {
     return await new ModelInstance(this).live(callback, diff);
+  }
+
+  public static $subscribe<SubModel extends Model>(this: { new(): SubModel }, diff?: boolean) {
+    return new ModelInstance(this).subscribe(diff);
   }
 
   public static async kill<SubModel extends Model>(this: { new(): SubModel }, uuid: string) {

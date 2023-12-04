@@ -8,7 +8,7 @@ await TypedSurQL.init("http://127.0.0.1:8000", {
     username: "root",
     password: "root"
   },
-  websocket: false,
+  websocket: true,
   namespace: "test",
   database: "test"
 })
@@ -32,12 +32,17 @@ class Friends extends Q.RelationEdge<User, User>{
 @Q.Table({ name: "user" })
 class User extends Q.Model {
   @Q.Prop() name!: string
-  @Q.Relation("->", Friends, "->", User) readonly friends!: Q.RecordOf<User>[] // so far the relational type must be readonly
-  @Q.Relation("->", Friends, ".*.out") readonly friendsMeta!: Q.RecordOf<Friends>[]
+  @Q.Relation("->", Friends, "->", User) readonly friends!: User[] // so far the relational type must be readonly
+  @Q.Relation("->", Friends, ".*.out") readonly friendsMeta!: Friends[]
   @Q.Prop(_ => [Todo]) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
   @Q.Record(User) bestFriend?: Q.RecordOf<User>
   @Q.Prop() password!: string
   @Q.Prop() email!: string
+}
+
+const liveQuery = User.$subscribe();
+for await (const data of liveQuery) {
+  console.log(data)
 }
 
 const UsersScope = await TypedSurQL.createScope(User, { $email: Q.Type.String(), $password: Q.Type.String() }, {
@@ -84,7 +89,7 @@ Permissions.Of(User, { scope: UsersScope, token: AuthToken })
 
 console.log(UsersScope, 'usersScope')
 export type UserObject = Q.Static<User>;
-export type Todo = Q.Static<typeof todo>;
+export type Todo = Q.Static<typeof Todo>;
 
 const henry = await User.create({ name: "henry", todos: [{ title: "test", completed: false }], email: "something@email.com", password: "12" });
 const bingo = await User.create({ name: "bingo", bestFriend: "user:0", todos: [{ title: "test", completed: false }, { title: "test2", completed: true }], email: "milking@email.com", password: "123" });
