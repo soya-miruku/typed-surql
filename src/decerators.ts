@@ -1,5 +1,5 @@
 import "npm:reflect-metadata";
-import { Kind, Optional, TObject, TRecord, Type } from "https://esm.sh/@sinclair/typebox@0.31.28";
+import { Kind, Optional, TObject, TProperties, TRecord, Type } from "https://esm.sh/@sinclair/typebox@0.31.28";
 import type { OnlyFields, StaticModel, Constructor, IModel, DotNestedKeys } from "./types/types.ts";
 
 export type ITable<SubModel extends IModel, K extends keyof SubModel = keyof SubModel, P = keyof OnlyFields<SubModel> & K> = {
@@ -29,9 +29,8 @@ export type IFieldParams<SubModel extends IModel> = {
   params?: IRelationParams<SubModel, StaticModel, StaticModel>;
 };
 
-export interface IFieldProps<SubModel extends IModel, Types> {
+export interface IFieldProps<SubModel extends IModel> {
   index?: { name: string, unique?: boolean, search?: boolean }
-  type?: ((t: typeof Type) => Types) | Types;
 }
 
 export function Table<SubModel extends IModel>(props?: ITable<SubModel, keyof SubModel>) {
@@ -55,18 +54,44 @@ function parseTObject<T extends TObject | TRecord>(t: T) {
   return properties;
 }
 
-export function Prop<SubModel extends IModel, Types extends TObject | TRecord>(fieldProps?: IFieldProps<SubModel, Types>) {
+export type RecursiveArray<TValue> = Array<RecursiveArray<TValue> | TValue>;
+export type ReturnTypeFuncValue = TypeValue | RecursiveArray<TypeValue> | TObject | TProperties;
+export type ReturnTypeFunc = (returns?: void) => ReturnTypeFuncValue;
+export interface TypeDecoratorParams<T> {
+  options: Partial<T>;
+  returnTypeFunc?: ReturnTypeFunc;
+}
+
+export function getTypeDecoratorParams<T extends object>(returnTypeFuncOrOptions: ReturnTypeFunc | T | undefined, maybeOptions: T | undefined): TypeDecoratorParams<T> {
+  if (typeof returnTypeFuncOrOptions === "function") {
+    return {
+      returnTypeFunc: returnTypeFuncOrOptions as ReturnTypeFunc,
+      options: maybeOptions || {},
+    };
+  }
+  return {
+    options: returnTypeFuncOrOptions || {},
+  };
+}
+
+export function Prop<SubModel extends IModel>(_type?: ReturnTypeFunc, fieldProps?: IFieldProps<SubModel>) {
   return function (target: SubModel, propertyKey: keyof SubModel) {
+    if (typeof propertyKey === "symbol") {
+      throw new SymbolKeysNotSupportedError();
+    }
+
     const name = propertyKey;
     const fields: IFieldParams<SubModel>[] = Reflect.getMetadata("fields", target.constructor, target.constructor.name) || [];
-    let type = Reflect.getMetadata("design:type", target, propertyKey.toString());
+
+    let type = _type ? _type() : Reflect.getMetadata("design:type", target, propertyKey.toString());
     type = type ?? { name: "unknown" }
     const isObject = type.name === "Object";
     const field = {
       name,
       isObject,
-      isArray: type.name === "Array",
-      type: fieldProps?.type ? parseTObject(typeof fieldProps?.type === "function" ? fieldProps?.type(Type) : fieldProps.type) : type.name,
+      isArray: Array.isArray(type) || type.name === "Array",
+      type,
+      // type: fieldProps?.type ? parseTObject(typeof fieldProps?.type === "function" ? fieldProps?.type(Type) : fieldProps.type) : type.name,
       index: fieldProps?.index,
     }
     fields.push(field);

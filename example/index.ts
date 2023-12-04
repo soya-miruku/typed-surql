@@ -15,10 +15,14 @@ await TypedSurQL.init("http://127.0.0.1:8000", {
 
 const SECRET = "eyJhbGciOiJIUzUxMiJ9.uMQdGd-";
 
-const todo = Q.Type.Object({
-  title: Q.Type.String(),
-  completed: Q.Type.Boolean(),
-});
+class Todo {
+  title!: string
+  completed!: boolean
+}
+
+class TestObj {
+  age: number = 0;
+}
 
 @Q.Table({ name: "friends" })
 class Friends extends Q.RelationEdge<User, User>{
@@ -30,7 +34,7 @@ class User extends Q.Model {
   @Q.Prop() name!: string
   @Q.Relation("->", Friends, "->", User) readonly friends!: Q.RecordOf<User>[] // so far the relational type must be readonly
   @Q.Relation("->", Friends, ".*.out") readonly friendsMeta!: Q.RecordOf<Friends>[]
-  @Q.Prop({ type: todo }) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
+  @Q.Prop(_ => [Todo]) todos!: Todo[] // passing the object in the second arg, will allow you to later query the object using the query func
   @Q.Record(User) bestFriend?: Q.RecordOf<User>
   @Q.Prop() password!: string
   @Q.Prop() email!: string

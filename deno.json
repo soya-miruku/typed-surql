@@ -12,8 +12,7 @@
 		}
 	},
 	"compilerOptions": {
-		"experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+		"experimentalDecorators": true
 	},
 	"tasks": {
 		"build": "deno run -A ./compile.ts && cd npm && npm run build"
